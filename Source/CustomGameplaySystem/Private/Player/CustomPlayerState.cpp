@@ -4,6 +4,7 @@
 #include "Player/CustomPlayerState.h"
 
 #include "Components/LevelExpComponent.h"
+#include "Engine/OverlapResult.h"
 #include "FunctionLibraries/PrintLogFunctionLibrary.h"
 #include "GameFramework/GameStateBase.h"
 #include "GAS/Components/CustomAbilitySystemComponent.h"

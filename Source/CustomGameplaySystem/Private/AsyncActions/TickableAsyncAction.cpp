@@ -3,7 +3,7 @@
 
 #include "AsyncActions/TickableAsyncAction.h"
 
-#define UE_INLINE_GENERATED_CPP_BY_NAME(TickableAsyncAction)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(TickableAsyncAction)
 
 void UTickableAsyncAction::Activate()
 {

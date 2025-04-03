@@ -10,6 +10,7 @@
 #include "GameplayEffect.h"
 #include "DataAssets/CustomAbilityInfoDataAsset.h"
 #include "Engine/DamageEvents.h"
+#include "Engine/OverlapResult.h"
 #include "FunctionLibraries/CustomHelperFunctionLibrary.h"
 #include "FunctionLibraries/GameplayTagFunctionLibrary.h"
 #include "GAS/Abilities/DamageGameplayAbility.h"

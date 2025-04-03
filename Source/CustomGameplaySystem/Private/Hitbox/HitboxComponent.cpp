@@ -81,6 +81,7 @@ void FHitboxInfo::Reset()
 	LastSocketTraceLocation.Empty();
 }
 
+#if WITH_EDITOR
 void FHitboxInfo::PreviewDebug(const UObject* WorldContext, const float Radius, const float DrawTime)
 {
 	if (!CollidingComponent) return;
@@ -102,6 +103,7 @@ void FHitboxInfo::PreviewDebug(const UObject* WorldContext, const float Radius, 
 		Pair.Value = End;
 	}
 }
+#endif
 
 UHitboxComponent::UHitboxComponent()
 {
