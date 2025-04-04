@@ -10,6 +10,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Interfaces/LevelExpInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Misc/DataValidation.h"
 #include "Net/UnrealNetwork.h"
 #include "SaveLoadSystem/LevelExpSaveGame.h"
 #include "SaveLoadSystem/SaveLoadSubsystem.h"
@@ -188,3 +189,17 @@ AActor* ULevelExpComponent::GetAvatar() const
 
 	return GetOwner();
 }
+
+#if WITH_EDITOR
+EDataValidationResult ULevelExpComponent::IsDataValid(FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = Super::IsDataValid(Context);
+	if (!LevelUpData)
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(FText::FromString("LevelUpData is not set in ULevelExpComponent!"));
+	}
+
+	return Result;
+}
+#endif

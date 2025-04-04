@@ -85,4 +85,10 @@ private:
 	void OnExpChanged_Internal(const int OldValue, const int NewValue);
 
 	AActor* GetAvatar() const;
+
+public:
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
+#endif
 };
