@@ -17,10 +17,28 @@ class CUSTOMGAMEPLAYSYSTEM_API UCustomInputComponent : public UEnhancedInputComp
 
 public:
 
+	template<class UserClass, typename FuncType>
+	void BindNativeAction(const UCustomInputConfig* InputConfig, const FGameplayTag& InputTag, ETriggerEvent TriggerEvent,
+		UserClass* Object, FuncType Func, bool bLogIfNotFound);
+
 	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
 	TArray<uint32> BindAbilityActions(const UCustomInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc,
 		ReleasedFuncType ReleasedFunc);
+
+	void RemoveBinds(TArray<uint32>& BindHandles);
 };
+
+template <class UserClass, typename FuncType>
+void UCustomInputComponent::BindNativeAction(const UCustomInputConfig* InputConfig, const FGameplayTag& InputTag,
+	ETriggerEvent TriggerEvent, UserClass* Object, FuncType Func, bool bLogIfNotFound)
+{
+	check(InputConfig);
+	
+	if (const UInputAction* IA = InputConfig->FindNativeInputActionForTag(InputTag, bLogIfNotFound))
+	{
+		BindAction(IA, TriggerEvent, Object, Func);
+	}
+}
 
 template <class UserClass, typename PressedFuncType, typename ReleasedFuncType>
 TArray<uint32> UCustomInputComponent::BindAbilityActions(const UCustomInputConfig* InputConfig, UserClass* Object,

@@ -7,8 +7,10 @@
 #include "ModularPlayerController.h"
 #include "CustomPlayerController.generated.h"
 
+class UInputMappingContext;
 class UCustomInputConfig;
 class UCustomAbilitySystemComponent;
+struct FInputActionValue;
 
 /**
  * Main Player Controller of this CustomGameplaySystem plugin.
@@ -35,6 +37,8 @@ public:
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UInputMappingContext*> InputMappingContexts;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCustomInputConfig> InputConfig;
 

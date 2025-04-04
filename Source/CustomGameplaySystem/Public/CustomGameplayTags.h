@@ -38,6 +38,9 @@ namespace CustomTags
 	CUSTOMGAMEPLAYSYSTEM_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attribute_Vital_MaxHealth);
 	CUSTOMGAMEPLAYSYSTEM_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attribute_Vital_HealthRegen);
 
+	// Input tags
+	CUSTOMGAMEPLAYSYSTEM_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Move);
+
 	// Init States, mostly used for CustomPawnComponent_Base (which is a UPawnComponent)
 	/** 1: Actor/component has initially spawned and can be extended */
 	CUSTOMGAMEPLAYSYSTEM_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_Spawned);

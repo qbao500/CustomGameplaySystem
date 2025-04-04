@@ -26,6 +26,9 @@ namespace CustomTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Type_Passive, "Ability.Type.Passive", "Passive ability type");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Type_Active, "Ability.Type.Active", "Active ability type, can be triggered by input");
 
+	// Input tags
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Move, "Input.Move", "Move input tag");
+
 	// Attribute tags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Attribute_Meta, "Attribute.Meta", "Tags for Meta Attributes, if needed");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Attribute_Vital, "Attribute.Vital", "Tags for Vital Attributes");

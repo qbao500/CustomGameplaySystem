@@ -5,6 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
+#include "EnhancedInputSubsystems.h"
 #include "FunctionLibraries/PrintLogFunctionLibrary.h"
 #include "GameFramework/PlayerState.h"
 #include "GAS/Components/CustomAbilitySystemComponent.h"
@@ -52,11 +53,29 @@ void ACustomPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	check(LocalPlayer);
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(Subsystem);
+	Subsystem->ClearAllMappings();
+
+	FModifyContextOptions Options;
+	Options.bIgnoreAllPressedKeysUntilRelease = false;
+
+	int32 Priority = 0;
+	for (const UInputMappingContext* Context : InputMappingContexts)
+	{
+		// Add Input Mapping Context
+		Subsystem->AddMappingContext(Context, Priority, Options);
+		++Priority;
+	}
+
 	UCustomInputComponent* CustomInputComponent = Cast<UCustomInputComponent>(InputComponent);
 	if (ensureMsgf(CustomInputComponent,
 		TEXT("Unexpected Input Component class! The Gameplay Abilities will not be bound to their inputs. "
-	   "Change the input component to UCustomInputComponent or a subclass of it.")))
+		"Change the input component to UCustomInputComponent or a subclass of it.")))
 	{
+		// Bind Ability Actions
 		TArray<uint32> Handles = CustomInputComponent->BindAbilityActions(InputConfig, this,
 			&ThisClass::AbilityInputTagPressed,	&ThisClass::AbilityInputTagReleased);
 	}
@@ -103,6 +122,25 @@ EDataValidationResult ACustomPlayerController::IsDataValid(FDataValidationContex
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(FText::FromString("InputConfig is not set!"));
+	}
+
+	if (InputMappingContexts.Num() <= 0)
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(FText::FromString("Please add at least one InputMappingContext!"));
+	}
+	else
+	{
+		for (int32 Index = 0; Index < InputMappingContexts.Num(); ++Index)
+		{
+			const UInputMappingContext* MappingContext = InputMappingContexts[Index];
+			if (!MappingContext)
+			{
+				Result = EDataValidationResult::Invalid;
+				FString ErrorMessage = FString::Printf(TEXT("InputMappingContext[%d] is not set!"), Index);
+				Context.AddError(FText::FromString(ErrorMessage));
+			}
+		}
 	}
 
 	return Result;
