@@ -17,9 +17,9 @@
 ACustomCharacterBase::ACustomCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 	
 	CorePawnComponent = CreateDefaultSubobject<UCustomCorePawnComponent>("Core Pawn Component");
-	
 	HealthComponent = CreateDefaultSubobject<UCustomHealthComponent>("Health Component");
 
 	GetMesh()->bEnableUpdateRateOptimizations = true;
