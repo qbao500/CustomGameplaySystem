@@ -37,8 +37,17 @@ void ACustomPlayerStart::UpdateTagText() const
 {
 	if (TagTextRender)
 	{
-		const FString TagText = PlayerStartTag.IsNone() ? "No Tag" : PlayerStartTag.ToString();
-		TagTextRender->SetText(FText::FromString(TagText));
+		const bool bNoTag = PlayerStartTag.IsNone();
+		if (bHideTagTextIfNone && bNoTag)
+		{
+			TagTextRender->SetVisibility(false);
+		}
+		else
+		{
+			TagTextRender->SetVisibility(true);
+			const FString TagText = PlayerStartTag.IsNone() ? "No Tag" : PlayerStartTag.ToString();
+			TagTextRender->SetText(FText::FromString(TagText));
+		}
 	}
 }
 #endif

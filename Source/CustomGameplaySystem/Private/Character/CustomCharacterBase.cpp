@@ -44,8 +44,8 @@ void ACustomCharacterBase::BeginPlay()
 
 	if (HasAuthority())
 	{
-		// When playing in Dedicated Server, animations are triggered but not played on server side, because the mesh it not rendered
-		// This makes logics that depend on socket location return wrong locations on server
+		// When playing in Dedicated Server, animations are triggered but not played on Server side, because the mesh it not rendered
+		// This makes logics that depend on socket location return wrong locations on Server
 		// So force it to always refresh bones on Server, for now. Probably there's a better solution.
 		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	}

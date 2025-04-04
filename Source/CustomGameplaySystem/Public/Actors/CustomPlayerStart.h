@@ -24,8 +24,11 @@ public:
 protected:
 
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UTextRenderComponent> TagTextRender;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bHideTagTextIfNone = true;
 #endif
 
 #if WITH_EDITOR
