@@ -41,4 +41,10 @@ private:
 
 	UFUNCTION()
 	void OnDeathStarted(AActor* OwningActor, const AActor* DeathInstigator);
+
+public:
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
+#endif
 };

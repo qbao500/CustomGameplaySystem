@@ -5,6 +5,7 @@
 
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "Character/CustomHealthComponent.h"
+#include "Misc/DataValidation.h"
 #include "Perception/AIPerceptionComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CustomAIController)
@@ -47,3 +48,19 @@ void ACustomAIController::OnDeathStarted(AActor* OwningActor, const AActor* Deat
 		BrainComponent->StopLogic("Death Started");
 	}
 }
+
+#if WITH_EDITOR
+EDataValidationResult ACustomAIController::IsDataValid(FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = Super::IsDataValid(Context);
+	
+	// Check if the behavior tree is valid
+	if (!MainBehaviorTree)
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(FText::FromString("Please assign Main Behavior Tree!"));
+	}
+
+	return Result;
+}
+#endif
