@@ -21,6 +21,8 @@ enum class ETargetLockMethod : uint8
 	FromOwnerPawnNoLook,
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFoundBestTarget, AActor*, Target);
+
 /**
  * A component that uses EnemyManagerSubsystem to find the best target enemy.
  * Must put in Pawn or Character that uses for Player.
@@ -49,6 +51,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetMaxFocusAngle(const float NewValue);
+
+	UPROPERTY(BlueprintAssignable)
+	FFoundBestTarget OnFoundBestTarget;
 
 protected:
 

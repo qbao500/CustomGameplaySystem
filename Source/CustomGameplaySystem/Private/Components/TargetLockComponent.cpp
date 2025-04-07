@@ -70,6 +70,10 @@ void UTargetLockComponent::TickFindTarget(float DeltaTime)
 	if (!OwnerPawn || !EnemyManager) return;
 
 	BestTarget = FindBestTarget();
+	if (BestTarget.Get())
+	{
+		OnFoundBestTarget.Broadcast(BestTarget.Get());
+	}
 
 	if (bDebug && BestTarget.Get())
 	{

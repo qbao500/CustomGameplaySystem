@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS(Abstract)
+UCLASS()
 class CUSTOMGAMEPLAYSYSTEM_API UDeathGameplayAbility : public UCustomGameplayAbility
 {
 	GENERATED_BODY()
