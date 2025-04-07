@@ -5,21 +5,31 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemInterface.h"
 #include "FunctionLibraries/CustomHelperFunctionLibrary.h"
 #include "FunctionLibraries/PrintLogFunctionLibrary.h"
 #include "Interfaces/CombatInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Subsystems/EnemyManagerSubsystem.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(TargetLockComponent)
+
 UTargetLockComponent::UTargetLockComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.TickInterval = 0.1f;
 }
 
 void UTargetLockComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// If debug is on, then force to tick every frame
+#if WITH_EDITOR
+	if (bDebug)
+	{
+		SetComponentTickInterval(-1.0f);
+	}
+#endif
 
 	OwnerPawn = Cast<APawn>(GetOwner());
 	if (!OwnerPawn) return;
@@ -32,33 +42,57 @@ void UTargetLockComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!OwnerPawn || !EnemyManager) return;
-
-	BestTarget = FindBestTarget();
-
-	if (bDebug && BestTarget)
-	{
-		DrawDebugSphere(GetWorld(), BestTarget->GetActorLocation(), 25, 16, FColor::Purple, false, -1, 0, 3);
-	}
+	TickFindTarget(DeltaTime);
 }
 
 AActor* UTargetLockComponent::GetBestTarget() const
 {
-	return BestTarget;
+	return BestTarget.Get();
 }
 
-AActor* UTargetLockComponent::FindBestTarget() const
+float UTargetLockComponent::GetMaxDistance() const
 {
-	AActor* ClosestTarget = nullptr;
+	return MaxDistance;
+}
+
+float UTargetLockComponent::GetLocationForwardOffset() const
+{
+	return LocationForwardOffset;
+}
+
+void UTargetLockComponent::SetMaxFocusAngle(const float NewValue)
+{
+	MaxFocusAngle = FMath::Abs(NewValue);
+}
+
+void UTargetLockComponent::TickFindTarget(float DeltaTime)
+{
+	if (!OwnerPawn || !EnemyManager) return;
+
+	BestTarget = FindBestTarget();
+
+	if (bDebug && BestTarget.Get())
+	{
+		DrawDebugSphere(GetWorld(), BestTarget->GetActorLocation(), 25, 16, FColor::Purple,
+			false, GetDebugTime(), 0, 3);
+	}
+}
+
+AActor* UTargetLockComponent::FindBestTarget(const TSet<AActor*>& IgnoredActors) const
+{
+	AActor* BestActor = nullptr;
 	float BestScore = FLT_MAX; // We want to minimize the score
 
 	// Get the player's location and forward direction
-	const FVector PlayerLocation = OwnerPawn->GetActorLocation();
+	const FVector PlayerLocation = GetOwnerLocation();
 	const FVector CameraForward = OwnerPawn->GetControlRotation().Vector();
 
-	for (AActor* Enemy : EnemyManager->GetNearbyEnemies())
+	TSet<AActor*> NearbyEnemies = EnemyManager->GetNearbyEnemies();
+	for (AActor* Enemy : NearbyEnemies)
 	{
-		if (!Enemy) continue; // Skip null pointers
+		if (!IsValid(Enemy)) continue;
+
+		if (IgnoredActors.Contains(Enemy)) continue;
 
 		bool bFinisherTarget = false;
 		if (bCheckFinisherTarget && FinisherTag.IsValid())
@@ -76,27 +110,30 @@ AActor* UTargetLockComponent::FindBestTarget() const
 		FVector TargetLocation = Enemy->GetActorLocation();
 		const float Distance = FVector::Dist(PlayerLocation, TargetLocation);
 		const float FinalMaxDistance = MaxDistance * GetOnAirMultiplier() * (bFinisherTarget ? FinisherMaxDistanceMultiplier : 1.0f);
-
 		if (Distance > FinalMaxDistance)
 		{
 			DebugString(Enemy, "Too far", 0, 1.5f, FColor::Yellow);
 			continue;
 		}
 		
-		// Calculate the angle to the enemy
-		FVector DirectionToTarget = (TargetLocation - PlayerLocation).GetSafeNormal();
-		const float AngleToTarget = HFL::GetAngleBetweenDirections(CameraForward, DirectionToTarget);
-		const float MaxAngle = bFinisherTarget ? 90.0f : MaxFocusAngle;
-
-		// Ignore this enemy if it's not in camera focus
-		if (AngleToTarget >= MaxAngle)
+		// Calculate the angle to the enemy, if method is FromCamera
+		float AngleToTarget = 0.0f;
+		if (ShouldCheckLookAngle())
 		{
-			DebugString(Enemy, "Out of focus", 0, 1.5f, FColor::Yellow);
-			continue;
+			FVector DirectionToTarget = (TargetLocation - PlayerLocation).GetSafeNormal();
+			AngleToTarget = HFL::GetAngleBetweenDirections(CameraForward, DirectionToTarget);
+			const float MaxAngle = bFinisherTarget ? 90.0f : MaxFocusAngle;
+
+			// Ignore this enemy if it's not in camera focus
+			if (AngleToTarget >= MaxAngle)
+			{
+				DebugString(Enemy, "Out of focus", 0, 1.5f, FColor::Yellow);
+				continue;
+			}
 		}
 		
 		// Check sight, ignore if blocked
-		if (IsSightToTargetBlocked(Enemy))
+		if (bCheckLineOfSight && IsSightToTargetBlocked(Enemy))
 		{
 			DebugString(Enemy, "Sight Blocked", 0, 1.5f, FColor::Red);
 			continue;
@@ -113,19 +150,35 @@ AActor* UTargetLockComponent::FindBestTarget() const
 		}
 
 		// Debug score
-		DebugString(Enemy, "Score: " + FString::FromInt(Score), 20);
-		DebugString(Enemy, "Distance: " + FString::FromInt(Distance), 0);
-		DebugString(Enemy, "Angle: " + FString::Printf(TEXT("%.2f"), AngleToTarget), -20);
+		DebugString(Enemy, "Score: " + FString::FromInt(Score), DebugStringHeightOffset, 1.35f, FColor::White);
+		if (!bDebugOnyScore && ShouldCheckLookAngle())
+		{
+			constexpr FColor SubColor (255, 255, 255, 200);
+			DebugString(Enemy, "Distance: " + FString::FromInt(Distance), 0, 1.25f, SubColor);
+			DebugString(Enemy, "Angle: " + FString::Printf(TEXT("%.2f"), AngleToTarget), -DebugStringHeightOffset, 1.25f, SubColor);
+		}
 		
 		// Find the best (the lowest score) enemy
 		if (Score < BestScore)
 		{
 			BestScore = Score;
-			ClosestTarget = Enemy;
+			BestActor = Enemy;
 		}
 	}
 
-	return ClosestTarget;
+	return BestActor;
+}
+
+bool UTargetLockComponent::ShouldCheckLookAngle() const
+{
+	switch (TargetLockMethod)
+	{
+	case ETargetLockMethod::FromCamera:
+	case ETargetLockMethod::FromOwnerPawn:
+		return true;
+	default: 
+		return false;
+	}
 }
 
 bool UTargetLockComponent::IsSightToTargetBlocked(const AActor* Target) const
@@ -134,8 +187,9 @@ bool UTargetLockComponent::IsSightToTargetBlocked(const AActor* Target) const
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerPawn);
 	Params.AddIgnoredActor(Target);
-	return GetWorld()->LineTraceSingleByChannel(Hit, CameraManager->GetCameraLocation(), Target->GetActorLocation(),
-		ECC_Visibility, Params);
+	const FVector StartLoc = TargetLockMethod == ETargetLockMethod::FromCamera ? CameraManager->GetCameraLocation() : GetOwnerLocation();
+	
+	return GetWorld()->LineTraceSingleByChannel(Hit, StartLoc, Target->GetActorLocation(), LineOfSightChannel, Params);
 }
 
 float UTargetLockComponent::GetOnAirMultiplier() const
@@ -147,9 +201,20 @@ float UTargetLockComponent::GetOnAirMultiplier() const
 	return ICombatInterface::Execute_IsOnAir(OwnerPawn) ? OnAirMaxDistanceMultiplier : 1.0f;
 }
 
+FVector UTargetLockComponent::GetOwnerLocation() const
+{
+	check(OwnerPawn);
+	return OwnerPawn->GetActorLocation() + (OwnerPawn->GetActorForwardVector() * LocationForwardOffset);
+}
+
 void UTargetLockComponent::DebugString(AActor* Actor, const FString& Text, const float HeightOffset, const float FontScale, const FColor Color) const
 {
 	if (!Actor || !bDebug) return;
 
 	DrawDebugString(Actor->GetWorld(), FVector(0, 0, HeightOffset), Text, Actor, Color, 0, false, FontScale);
+}
+
+float UTargetLockComponent::GetDebugTime() const
+{
+	return GetComponentTickInterval();
 }
