@@ -221,7 +221,7 @@ void ACustomCharacterBase::InitStartUpAbilities()
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Passive, 1);
 		AbilitySpec.DynamicAbilityTags.AddTag(CustomTags::Ability_Type_Passive);
-		GetAbilitySystemComponent()->GiveAbilityAndActivateOnce(AbilitySpec);
+		GetAbilitySystemComponent()->GiveAbility(AbilitySpec);
 	}
 }
 

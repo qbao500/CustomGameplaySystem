@@ -27,7 +27,10 @@ bool UProjectileGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHa
 	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags,
 	const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
 {
-	if (!LoadedProjectileClass) return false;
+	if (ActivationPolicy != EAbilityActivationPolicy::OnSpawn)
+	{
+		if (!LoadedProjectileClass) return false;
+	}
 	
 	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
