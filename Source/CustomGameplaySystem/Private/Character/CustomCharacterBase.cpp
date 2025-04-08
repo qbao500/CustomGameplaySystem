@@ -281,14 +281,16 @@ void ACustomCharacterBase::UninitAndDestroy()
 
 void ACustomCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect>& Effect, const float Level) const
 {
-	check(GetAbilitySystemComponent());
-	check(Effect);
+	if (!Effect) return;
 
-	FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (!ASC) return;
+
+	FGameplayEffectContextHandle ContextHandle = ASC->MakeEffectContext();
 	ContextHandle.AddSourceObject(this);
-	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(Effect, Level, ContextHandle);
+	const FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(Effect, Level, ContextHandle);
 
-	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+	ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 }
 
 #if WITH_EDITOR

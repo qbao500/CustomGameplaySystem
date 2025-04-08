@@ -6,27 +6,30 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayTagAssetInterface.h"
 #include "GenericTeamAgentInterface.h"
-#include "ModularCharacter.h"
+#include "ModularPawn.h"
 #include "Interfaces/CombatInterface.h"
 #include "Interfaces/LevelExpInterface.h"
-#include "CustomCharacterBase.generated.h"
+#include "CustomPawnBase.generated.h"
 
-class UCustomAbilitySystemComponent;
+class UFloatingPawnMovement;
 class UCustomHealthComponent;
-class UCustomCorePawnComponent;
 class UGameplayAbility;
+class UCustomCorePawnComponent;
 class UGameplayEffect;
-class UAttributeSet;
+class UCustomAbilitySystemComponent;
 
+/**
+ * 
+ */
 UCLASS(Abstract)
-class CUSTOMGAMEPLAYSYSTEM_API ACustomCharacterBase : public AModularCharacter, public IAbilitySystemInterface,
+class CUSTOMGAMEPLAYSYSTEM_API ACustomPawnBase : public AModularPawn, public IAbilitySystemInterface,
 	public IGameplayTagAssetInterface, public ICombatInterface, public IGenericTeamAgentInterface, public ILevelExpInterface
 {
 	GENERATED_BODY()
 
 public:
 
-	ACustomCharacterBase();
+	ACustomPawnBase();
 
 	//~ Begin AActor interface
 	virtual void PostInitializeComponents() override;
@@ -40,6 +43,8 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void OnRep_Controller() override;
 	virtual void OnRep_PlayerState() override;
+	virtual void FaceRotation(FRotator NewControlRotation, float DeltaTime) override;
+	virtual UPawnMovementComponent* GetMovementComponent() const override;
 	//~ End APawn interface
 
 	//~ Begin IAbilitySystemInterface interface
@@ -57,7 +62,6 @@ public:
 
 	//~ Begin ICombatInterface interface
 	virtual UCapsuleComponent* GetCapsule_Implementation() const override;
-	virtual USkeletalMeshComponent* GetMainMesh_Implementation() const override;
 	virtual FVector GetFootLocation_Implementation() const override;
 	virtual bool IsAlive_Implementation() override;
 	virtual bool IsOnAir_Implementation() const override;
@@ -73,8 +77,17 @@ public:
 	virtual int32 GetCurrentXP_Implementation() const override;
 	// End ILevelExpInterface interface
 
-protected:
+	UFUNCTION(BlueprintPure)
+	UCapsuleComponent* GetCapsuleComponent() const;
+	UFUNCTION(BlueprintPure)
+	UFloatingPawnMovement* GetPawnMovement() const;
 
+	// Used when rotate to Controller's rotation
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pawn)
+	float SmoothRotationSpeed = 10.0f;
+
+protected:
+	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCustomCorePawnComponent> CorePawnComponent;
 
@@ -96,9 +109,10 @@ protected:
 
 	void ApplyEffectToSelf(const TSubclassOf<UGameplayEffect>& Effect, const float Level = 1.0f) const;
 
-public:
+private:
 
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
-#endif
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UFloatingPawnMovement> MovementComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UCapsuleComponent> CapsuleComponent;
 };
