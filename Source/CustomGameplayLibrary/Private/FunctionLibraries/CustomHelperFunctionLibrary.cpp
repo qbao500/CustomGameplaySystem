@@ -581,6 +581,15 @@ bool UCustomHelperFunctionLibrary::IsPlayer(AActor* CheckingActor)
 	return false;
 }
 
+void UCustomHelperFunctionLibrary::SetMeshRagdoll(USkeletalMeshComponent* Mesh)
+{
+	if (!Mesh) return;
+
+	Mesh->SetSimulatePhysics(true);
+	Mesh->SetEnableGravity(true);
+	Mesh->SetCollisionProfileName("Ragdoll");
+}
+
 FVector UCustomHelperFunctionLibrary::ChooseBestAimingLocation(const FVector& AimingDirection, const FVector& AimingFromLocation,
                                                                const FVector& LocationA, const FVector& LocationB, bool& bPickedLocationA)
 {

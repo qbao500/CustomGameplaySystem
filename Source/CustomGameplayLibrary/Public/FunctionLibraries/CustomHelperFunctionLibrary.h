@@ -104,6 +104,8 @@ public:
 		const TArray<AActor*>& IgnoreActors, ECollisionChannel TraceChannel, FHitResult& OutHitResult);
 	UFUNCTION(BlueprintPure)
 	static bool IsPlayer(AActor* CheckingActor);
+	UFUNCTION(BlueprintCallable)
+	static void SetMeshRagdoll(USkeletalMeshComponent* Mesh);
 
 	// Projectile
 	UFUNCTION(BlueprintPure)
