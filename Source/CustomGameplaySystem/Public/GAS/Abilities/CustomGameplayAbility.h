@@ -121,6 +121,8 @@ protected:
 	UFUNCTION(BlueprintPure)
 	static const FGameplayTagContainer& GetDamageTags();
 
+	FTimerManager& GetTimerManager() const;
+
 private:
 
 	// Used for default implementation of FillAbilityDescriptionWithFormat to format the Cost value.

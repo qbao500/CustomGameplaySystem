@@ -208,3 +208,8 @@ const FGameplayTagContainer& UCustomGameplayAbility::GetDamageTags()
 {
 	return UCustomAbilitySystemGlobals::GetDamageTags();
 }
+
+FTimerManager& UCustomGameplayAbility::GetTimerManager() const
+{
+	return GetWorld()->GetTimerManager();
+}
