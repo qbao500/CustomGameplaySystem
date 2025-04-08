@@ -35,7 +35,7 @@ class CUSTOMGAMEPLAYSYSTEM_API UTargetLockComponent : public UActorComponent
 public:	
 	
 	UTargetLockComponent();
-
+	
 	//~ Begin UActorComponent interface
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override final;
@@ -124,4 +124,9 @@ protected:
 	// Debug helper
 	void DebugString(AActor* Actor, const FString& Text, const float HeightOffset = 0.0f, const float FontScale = 1.25f, const FColor Color = FColor::White) const;
 	float GetDebugTime() const;
+
+private:
+
+	UFUNCTION()
+	void OnPawnControllerChanged(APawn* Pawn, AController* OldController, AController* NewController);
 };

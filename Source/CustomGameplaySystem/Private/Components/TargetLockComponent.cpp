@@ -32,9 +32,22 @@ void UTargetLockComponent::BeginPlay()
 #endif
 
 	OwnerPawn = Cast<APawn>(GetOwner());
-	if (!OwnerPawn) return;
+	if (!OwnerPawn)
+	{
+		PLFL::PrintError("TargetLockComponent must be on a Pawn!");
+		return;
+	}
+
+	// If the Pawn is already possessed, we can set the Camera Manger now
+	if (APlayerController* PC = OwnerPawn->GetLocalViewingPlayerController())
+	{
+		OnPawnControllerChanged(OwnerPawn, nullptr, PC);
+	}
+
+	// If the Pawn is not possessed yet, we need to wait until it is
+	OwnerPawn->ReceiveControllerChangedDelegate.AddDynamic(this, &ThisClass::OnPawnControllerChanged);
 	
-	CameraManager = OwnerPawn->GetLocalViewingPlayerController()->PlayerCameraManager;
+	// Cache this to use later
 	EnemyManager = UWorld::GetSubsystem<UEnemyManagerSubsystem>(GetWorld());
 }
 
@@ -187,11 +200,19 @@ bool UTargetLockComponent::ShouldCheckLookAngle() const
 
 bool UTargetLockComponent::IsSightToTargetBlocked(const AActor* Target) const
 {
+	const bool bFromCamera = TargetLockMethod == ETargetLockMethod::FromCamera;
+
+	// If from Camera but Camera Manager is not valid yet, then just allow this sight check (not blocked)
+	if (bFromCamera && !CameraManager)
+	{
+		return false;
+	}
+	
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerPawn);
 	Params.AddIgnoredActor(Target);
-	const FVector StartLoc = TargetLockMethod == ETargetLockMethod::FromCamera ? CameraManager->GetCameraLocation() : GetOwnerLocation();
+	const FVector StartLoc = bFromCamera ? CameraManager->GetCameraLocation() : GetOwnerLocation();
 	
 	return GetWorld()->LineTraceSingleByChannel(Hit, StartLoc, Target->GetActorLocation(), LineOfSightChannel, Params);
 }
@@ -221,4 +242,12 @@ void UTargetLockComponent::DebugString(AActor* Actor, const FString& Text, const
 float UTargetLockComponent::GetDebugTime() const
 {
 	return GetComponentTickInterval();
+}
+
+void UTargetLockComponent::OnPawnControllerChanged(APawn* Pawn, AController* OldController, AController* NewController)
+{
+	if (APlayerController* PlayerController = Cast<APlayerController>(NewController))
+	{
+		CameraManager = PlayerController->PlayerCameraManager;
+	}
 }
