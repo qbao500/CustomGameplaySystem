@@ -37,6 +37,8 @@ protected:
 private:
 
 	UPROPERTY(EditDefaultsOnly)
+	bool bUseBehaviorTree = true;
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UBehaviorTree> MainBehaviorTree;
 
 	UFUNCTION()

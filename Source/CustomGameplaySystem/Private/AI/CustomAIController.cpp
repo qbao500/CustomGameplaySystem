@@ -24,9 +24,12 @@ void ACustomAIController::OnPossess(APawn* InPawn)
 	// AI should only exist on Server
 	if (!HasAuthority()) return;
 
-	ensureAlwaysMsgf(MainBehaviorTree, TEXT("Please assign MainBehaviorTree in CustomAIController"));
-	RunBehaviorTree(MainBehaviorTree);
-	BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(GetBrainComponent());
+	if (bUseBehaviorTree)
+	{
+		ensureAlwaysMsgf(MainBehaviorTree, TEXT("Please assign MainBehaviorTree in CustomAIController"));
+		RunBehaviorTree(MainBehaviorTree);
+		BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(GetBrainComponent());
+	}
 
 	if (UCustomHealthComponent* HealthComp = UCustomHealthComponent::FindHealthComponent(InPawn))
 	{
@@ -55,10 +58,10 @@ EDataValidationResult ACustomAIController::IsDataValid(FDataValidationContext& C
 	EDataValidationResult Result = Super::IsDataValid(Context);
 	
 	// Check if the behavior tree is valid
-	if (!MainBehaviorTree)
+	if (bUseBehaviorTree && !MainBehaviorTree)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::FromString("Please assign Main Behavior Tree!"));
+		Context.AddError(FText::FromString("Please assign Main Behavior Tree! Otherwise, set bUseBehaviorTree to false"));
 	}
 
 	return Result;
