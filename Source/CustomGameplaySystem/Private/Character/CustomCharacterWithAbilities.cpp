@@ -16,21 +16,6 @@ ACustomCharacterWithAbilities::ACustomCharacterWithAbilities()
 	HealthSet = CreateDefaultSubobject<UHealthAttributeSet>("HealthSet");
 }
 
-void ACustomCharacterWithAbilities::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	check(AbilitySystemComponent);
-	AbilitySystemComponent->InitAbilityActorInfo(this, this);
-}
-
-void ACustomCharacterWithAbilities::BeginPlay()
-{
-	Super::BeginPlay();
-
-	OnAbilitySystemInitialized(AbilitySystemComponent);
-}
-
 UAbilitySystemComponent* ACustomCharacterWithAbilities::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;

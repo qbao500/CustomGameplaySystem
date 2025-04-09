@@ -3,6 +3,7 @@
 
 #include "Player/CustomPlayerState.h"
 
+#include "Character/CustomCorePawnComponent.h"
 #include "Components/LevelExpComponent.h"
 #include "Engine/OverlapResult.h"
 #include "FunctionLibraries/PrintLogFunctionLibrary.h"
@@ -21,12 +22,23 @@ ACustomPlayerState::ACustomPlayerState()
 	AbilitySystemComponent = CreateDefaultSubobject<UCustomAbilitySystemComponent>("Ability System Component");
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+	
+	// AbilitySystemComponent needs to be updated at a high frequency.
+	NetUpdateFrequency = 100.0f;
 
 	HealthSet = CreateDefaultSubobject<UHealthAttributeSet>("Health Set");
 
 	LevelExpComponent = CreateDefaultSubobject<ULevelExpComponent>("Level Exp Component");
-	
-	NetUpdateFrequency = 100.0f;
+}
+
+void ACustomPlayerState::ClientInitialize(AController* C)
+{
+	Super::ClientInitialize(C);
+
+	if (UCustomCorePawnComponent* CorePawnComp = UCustomCorePawnComponent::FindCorePawnComponent(GetPawn()))
+	{
+		CorePawnComp->CheckDefaultInitialization();
+	}
 }
 
 UCustomAbilitySystemComponent* ACustomPlayerState::GetCustomAbilitySystemComponent() const

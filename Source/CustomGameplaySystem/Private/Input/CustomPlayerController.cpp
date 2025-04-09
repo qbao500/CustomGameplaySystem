@@ -52,7 +52,7 @@ void ACustomPlayerController::OnRep_PlayerState()
 void ACustomPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-
+	
 	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
 	check(LocalPlayer);
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();

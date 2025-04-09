@@ -3,10 +3,12 @@
 
 #include "Character/CustomCorePawnComponent.h"
 
+#include "AbilitySystemGlobals.h"
 #include "CustomGameplayTags.h"
 #include "CustomLogChannels.h"
 #include "FunctionLibraries/PrintLogFunctionLibrary.h"
 #include "GAS/Components/CustomAbilitySystemComponent.h"
+#include "Misc/DataValidation.h"
 #include "Player/CustomPlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CustomCorePawnComponent)
@@ -54,10 +56,62 @@ UCustomCorePawnComponent* UCustomCorePawnComponent::FindCorePawnComponent(const 
 
 bool UCustomCorePawnComponent::CanChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) const
 {
+	check(Manager);
+
+	const APawn* Pawn = GetPawn<APawn>();
+	if (!CurrentState.IsValid() && DesiredState == CustomTags::InitState_Spawned)
+	{
+		// As long as we are on a valid pawn, we count as spawned
+		if (Pawn)
+		{
+			return true;
+		}
+	}
+	else if (CurrentState == CustomTags::InitState_Spawned && DesiredState == CustomTags::InitState_DataAvailable)
+	{
+		// Pawn data is required.
+		/*if (!PawnData)
+		{
+			return false;
+		}*/
+
+		// If we're authority or autonomous, we need to wait for a Controller with registered ownership of the PlayerState (must for PlayerController).
+		// Also for local PlayerController, we need both InputComponent and LocalPlayer to be valid.
+		if (Pawn->GetLocalRole() != ROLE_SimulatedProxy)
+		{
+			const AController* Controller = GetController<AController>();
+			if (!Controller) return false;
+			
+			// If it's Player, then PlayerState is a must. AI can optionally have PlayerState.
+			const APlayerState* PlayerState = Controller->PlayerState;
+			
+			// Handle for Player
+			if (const APlayerController* PC = Cast<APlayerController>(Controller))
+			{
+				const bool bHasControllerPairedWithPS = IsValid(PlayerState) && PlayerState->GetOwner() == Controller;
+				const bool bHasValidInput = Pawn->InputComponent && PC->GetLocalPlayer();
+
+				return bHasControllerPairedWithPS && bHasValidInput;
+			}
+			
+			// AI can have PlayerState, but it's not a must
+			if (PlayerState)
+			{
+				return PlayerState->GetOwner() == Controller;
+			}
+		}
+
+		return true;
+	}
+	
 	if (CurrentState == CustomTags::InitState_DataAvailable && DesiredState == CustomTags::InitState_DataInitialized)
 	{
-		const ACustomPlayerState* CustomPS = GetPlayerState<ACustomPlayerState>();
-		return CustomPS != nullptr;
+		return true;
+	}
+
+	if (CurrentState == CustomTags::InitState_DataInitialized && DesiredState == CustomTags::InitState_GameplayReady)
+	{
+		return true;
 	}
 	
 	return Super::CanChangeInitState(Manager, CurrentState, DesiredState);
@@ -67,16 +121,29 @@ void UCustomCorePawnComponent::HandleChangeInitState(UGameFrameworkComponentMana
 {
 	if (CurrentState == CustomTags::InitState_DataAvailable && DesiredState == CustomTags::InitState_DataInitialized)
 	{
-		const APawn* Pawn = GetPawn<APawn>();
-		ACustomPlayerState* CustomPS = GetPlayerState<ACustomPlayerState>();
-		if (!ensure(Pawn && CustomPS))
+		// At this point, we must have a valid Pawn and Controller
+		// For Player (and optionally AI), PlayerState must be valid too
+		APawn* Pawn = GetPawn<APawn>();
+		const AController* Controller = GetController<AController>();
+		if (!ensure(Pawn && Controller))
 		{
 			return;
 		}
 
-		// The player state holds the persistent data for this player (state that persists across deaths and multiple pawns).
-		// The ability system component and attribute sets live on the player state.
-		InitializeAbilitySystem(CustomPS->GetCustomAbilitySystemComponent(), CustomPS);
+		// The PlayerState holds the persistent data (state that persists across deaths and multiple Pawns).
+		// The AbilitySystemComponent and AttributeSets live on the PlayerState.
+		if (ACustomPlayerState* CustomPS = GetPlayerState<ACustomPlayerState>())
+		{
+			InitializeAbilitySystem(CustomPS->GetCustomAbilitySystemComponent(), CustomPS);
+		}
+		else
+		{
+			// If PlayerState is not valid, it's most likely this is an AI
+			// The AI Pawn must have a valid CustomAbilitySystemComponent
+			UCustomAbilitySystemComponent* CustomASC = CastChecked<UCustomAbilitySystemComponent>(
+				UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Pawn));
+			InitializeAbilitySystem(CustomASC, Pawn);
+		}
 	}
 }
 
@@ -126,7 +193,7 @@ void UCustomCorePawnComponent::InitializeAbilitySystem(UCustomAbilitySystemCompo
 
 		// There is already a pawn acting as the ASC's avatar, so we need to kick it out
 		// This can happen on clients if they're lagged: their new pawn is spawned + possessed before the dead one is removed
-		if (!ExistingAvatar->HasAuthority()) return;;
+		if (!ExistingAvatar->HasAuthority()) return;
 
 		if (UCustomCorePawnComponent* OtherExtensionComponent = FindCustomPawnComponent<UCustomCorePawnComponent>(ExistingAvatar))
 		{
@@ -203,6 +270,11 @@ void UCustomCorePawnComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+void UCustomCorePawnComponent::OnRep_PawnData()
+{
+	CheckDefaultInitialization();
+}
+
 void UCustomCorePawnComponent::BroadcastAbilitySystemInitialized()
 {
 	OnAbilitySystemInitialized.Broadcast(AbilitySystemComponent);
@@ -214,4 +286,16 @@ void UCustomCorePawnComponent::BroadcastAbilitySystemInitialized()
 	{
 		OnAbilitySystemInitialized.RemoveAll(Object);
 	}
+}
+
+EDataValidationResult UCustomCorePawnComponent::IsDataValid(FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = Super::IsDataValid(Context);
+	/*if (!PawnData)
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(FText::FromString("Please assign PawnData!!!"));
+	}*/
+
+	return Result;
 }

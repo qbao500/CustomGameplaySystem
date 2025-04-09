@@ -6,6 +6,7 @@
 #include "CustomPawnComponent_Base.h"
 #include "CustomCorePawnComponent.generated.h"
 
+class UCustomPawnData;
 class UCustomAbilitySystemComponent;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAbilityComponentInitialized, UCustomAbilitySystemComponent*, AbilitySystemComponent);
@@ -64,6 +65,12 @@ protected:
 
 	/** Delegate fired when our pawn is removed as the ability system's avatar actor */
 	FSimpleMulticastDelegate OnAbilitySystemUninitialized;
+
+	// Pawn Data
+	UPROPERTY(EditInstanceOnly, ReplicatedUsing = OnRep_PawnData, Category = "Pawn Data")
+	TObjectPtr<const UCustomPawnData> PawnData;
+	UFUNCTION()
+	void OnRep_PawnData();
 	
 	/** Pointer to the ability system component that is cached for convenience. */
 	UPROPERTY(Transient)
@@ -75,4 +82,10 @@ private:
 	TSet<const UObject*> ListenOnceObjects;
 
 	void BroadcastAbilitySystemInitialized();
+
+public:
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
+#endif
 };

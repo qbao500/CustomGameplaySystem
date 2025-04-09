@@ -10,7 +10,7 @@ class UHealthAttributeSet;
 
 /**
  * ACustomCharacterBase typically gets the Ability System Component from the possessing player state.
- * This represents a character with a self-contained Ability System Component
+ * However, this represents a character with a self-contained Ability System Component
  * This class is used for characters that are not controlled by a player, such as AI or NPCs.
  * If you have YourGameCharacterBase (from CustomCharacterBase), then you can set up YourGameNPC similar to this.
  */
@@ -22,16 +22,14 @@ class CUSTOMGAMEPLAYSYSTEM_API ACustomCharacterWithAbilities : public ACustomCha
 public:
 
 	ACustomCharacterWithAbilities();
-
-	virtual void PostInitializeComponents() override;
-	virtual void BeginPlay() override;
-
+	
 	//~ Begin IAbilitySystemInterface interface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	//~ End IAbilitySystemInterface interface
 
 protected:
-	
+
+	// CustomCorePawnComponent will handle the initialization of the Ability System Component
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCustomAbilitySystemComponent> AbilitySystemComponent;
 	UPROPERTY(BlueprintReadOnly)

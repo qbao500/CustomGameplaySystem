@@ -26,6 +26,10 @@ public:
 
 	ACustomPlayerState();
 
+	//~ Begin APlayerState interface
+	virtual void ClientInitialize(AController* C) override;
+	//~ End APlayerState interface
+
 	//~ Begin IAbilitySystemInterface interface
 	UFUNCTION(BlueprintCallable, Category = "Custom|PlayerState")
 	UCustomAbilitySystemComponent* GetCustomAbilitySystemComponent() const;
