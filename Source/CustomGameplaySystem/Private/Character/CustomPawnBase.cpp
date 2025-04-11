@@ -215,8 +215,7 @@ FVector ACustomPawnBase::GetFootLocation_Implementation() const
 
 bool ACustomPawnBase::IsAlive_Implementation()
 {
-	return true;
-	//return HealthComponent->GetHealth() > 0.0f;
+	return HealthComponent->GetHealth() > 0.0f;
 }
 
 bool ACustomPawnBase::IsOnAir_Implementation() const
