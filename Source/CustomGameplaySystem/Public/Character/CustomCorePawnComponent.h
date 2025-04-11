@@ -28,13 +28,19 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintPure)
-	static UCustomCorePawnComponent* FindCorePawnComponent(const AActor* Actor);
+	static UCustomCorePawnComponent* FindCorePawnComponent(AActor* Actor);
 	static UCustomCorePawnComponent* FindCorePawnComponent(const APawn* Pawn);
 
 	UFUNCTION(BlueprintPure, Category = "Custom|Pawn")
 	UCustomAbilitySystemComponent* GetCustomAbilitySystemComponent() const { return AbilitySystemComponent; }
 
+	/** The name of this component-implemented feature */
+	static const FName NAME_ActorFeatureName;
+
 	//~ Begin IGameFrameworkInitStateInterface interface
+	virtual FName GetFeatureName() const override;
+	virtual void CheckDefaultInitialization() override;
+	virtual void OnActorInitStateChanged(const FActorInitStateChangedParams& Params) override;
 	virtual bool CanChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) const override;
 	virtual void HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) override;
 	//~ End IGameFrameworkInitStateInterface interface
@@ -56,9 +62,14 @@ public:
 	/** Register with the OnAbilitySystemUninitialized delegate fired when our pawn is removed as the ability system's avatar actor */
 	void OnAbilitySystemUninitialized_Register(const FSimpleMulticastDelegate::FDelegate& Delegate);
 
+	const UCustomPawnData* GetPawnData() const;
+
 protected:
 
+	//~ Begin UActorComponent interface
+	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	//~ End UActorComponent interface
 
 	/** Delegate fired when our pawn becomes the ability system's avatar actor */
 	FAbilityComponentInitializedMulticast OnAbilitySystemInitialized;
@@ -67,7 +78,7 @@ protected:
 	FSimpleMulticastDelegate OnAbilitySystemUninitialized;
 
 	// Pawn Data
-	UPROPERTY(EditInstanceOnly, ReplicatedUsing = OnRep_PawnData, Category = "Pawn Data")
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_PawnData, Category = "Pawn Data")
 	TObjectPtr<const UCustomPawnData> PawnData;
 	UFUNCTION()
 	void OnRep_PawnData();
@@ -78,10 +89,15 @@ protected:
 
 private:
 
+	UFUNCTION(Server, Reliable)
+	void Server_GrantAbilitySets();
+
 	UPROPERTY()
 	TSet<const UObject*> ListenOnceObjects;
 
 	void BroadcastAbilitySystemInitialized();
+
+	bool IsAuthorityOrLocal() const;
 
 public:
 

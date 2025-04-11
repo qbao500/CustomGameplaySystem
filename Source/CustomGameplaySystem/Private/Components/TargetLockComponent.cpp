@@ -17,6 +17,8 @@ UTargetLockComponent::UTargetLockComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickInterval = 0.1f;
+
+	SetIsReplicatedByDefault(true);
 }
 
 void UTargetLockComponent::BeginPlay()

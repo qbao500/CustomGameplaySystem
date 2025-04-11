@@ -17,6 +17,7 @@ enum class EAbilityActivationPolicy : uint8
 	WhileInputActive,
 
 	// Try to activate the ability when an avatar is assigned.
+	// Only work if NetExecutionPolicy is set to "ServerOnly" or "ServerInitiated"
 	OnSpawn
 };
 

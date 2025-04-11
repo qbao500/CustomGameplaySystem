@@ -2,34 +2,25 @@
 
 
 #include "Character/CustomPawnComponent_Base.h"
-
 #include "CustomGameplayTags.h"
+#include "GameFramework/PlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CustomPawnComponent_Base)
-
-//const FName UCustomPawnComponent_Base::NAME_ActorFeatureName("PleaseGiveNameInChildClass");
 
 UCustomPawnComponent_Base::UCustomPawnComponent_Base(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 	PrimaryComponentTick.bCanEverTick = false;
-
-	SetIsReplicatedByDefault(true);
-}
-
-FName UCustomPawnComponent_Base::GetFeatureName() const
-{
-	return NAME_ActorFeatureName;
 }
 
 void UCustomPawnComponent_Base::CheckDefaultInitialization()
 {
-	// Before checking our progress, try progressing any other features we might depend on
-	CheckDefaultInitializationForImplementers();
-
 	static const TArray<FGameplayTag> StateChain = {
-		CustomTags::InitState_Spawned, CustomTags::InitState_DataAvailable, CustomTags::InitState_DataInitialized, CustomTags::InitState_GameplayReady };
+		CustomTags::InitState_Spawned,
+		CustomTags::InitState_DataAvailable,
+		CustomTags::InitState_DataInitialized,
+		CustomTags::InitState_GameplayReady };
 
 	// This will try to progress from spawned (which is only set in BeginPlay) through the data initialization stages until it gets to gameplay ready
 	ContinueInitStateChain(StateChain);
@@ -59,7 +50,7 @@ void UCustomPawnComponent_Base::OnRegister()
 
 	TArray<UActorComponent*> PawnExtensionComponents;
 	Pawn->GetComponents(StaticClass(), PawnExtensionComponents);
-	ensureAlwaysMsgf((PawnExtensionComponents.Num() == 1), TEXT("Only one [%s] should exist on [%s]."), *StaticClass()->GetFName().ToString(), *GetNameSafe(GetOwner()));
+	//ensureAlwaysMsgf((PawnExtensionComponents.Num() == 1), TEXT("Only one [%s] should exist on [%s]."), *StaticClass()->GetFName().ToString(), *GetNameSafe(GetOwner()));
 
 	// Register with the init state system early, this will only work if this is a game world
 	RegisterInitStateFeature();
@@ -68,9 +59,6 @@ void UCustomPawnComponent_Base::OnRegister()
 void UCustomPawnComponent_Base::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Listen for changes to all features
-	BindOnActorInitStateChanged(NAME_None, FGameplayTag(), false);
 	
 	// Notifies state manager that we have spawned, then try rest of default initialization
 	ensure(TryToChangeInitState(CustomTags::InitState_Spawned));
@@ -82,4 +70,26 @@ void UCustomPawnComponent_Base::EndPlay(const EEndPlayReason::Type EndPlayReason
 	UnregisterInitStateFeature();
 	
 	Super::EndPlay(EndPlayReason);
+}
+
+APawn* UCustomPawnComponent_Base::FindPawnFromActor(AActor* Actor)
+{
+	if (!Actor) return nullptr;
+
+	APawn* FoundPawn = nullptr;
+
+	if (APawn* PawnActor = Cast<APawn>(Actor))
+	{
+		FoundPawn = PawnActor;
+	}
+	else if (const APlayerState* PlayerState = Cast<APlayerState>(Actor))
+	{
+		FoundPawn = PlayerState->GetPawn();
+	}
+	else if (const AController* Controller = Cast<AController>(Actor))
+	{
+		FoundPawn = Controller->GetPawn();
+	}
+
+	return FoundPawn;
 }

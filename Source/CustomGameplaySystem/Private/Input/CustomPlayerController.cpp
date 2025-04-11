@@ -11,6 +11,7 @@
 #include "GAS/Components/CustomAbilitySystemComponent.h"
 #include "Input/CustomInputComponent.h"
 #include "Misc/DataValidation.h"
+#include "Player/CustomPlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CustomPlayerController)
 
@@ -49,10 +50,30 @@ void ACustomPlayerController::OnRep_PlayerState()
 	CustomASC = CastChecked<UCustomAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PlayerState));
 }
 
-void ACustomPlayerController::SetupInputComponent()
+void ACustomPlayerController::PreProcessInput(const float DeltaTime, const bool bGamePaused)
 {
-	Super::SetupInputComponent();
+	Super::PreProcessInput(DeltaTime, bGamePaused);
+}
+
+void ACustomPlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)
+{
+	if (CustomASC)
+	{
+		CustomASC->ProcessAbilityInput(DeltaTime, bGamePaused);
+	}
 	
+	Super::PostProcessInput(DeltaTime, bGamePaused);
+}
+
+void ACustomPlayerController::AddCheats(bool bForce)
+{
+	Super::AddCheats(true);
+}
+
+void ACustomPlayerController::InitializePlayerInputFromConfig(const UCustomInputConfig* InputConfig)
+{
+	check(InputConfig);
+
 	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
 	check(LocalPlayer);
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -81,21 +102,6 @@ void ACustomPlayerController::SetupInputComponent()
 	}
 }
 
-void ACustomPlayerController::PreProcessInput(const float DeltaTime, const bool bGamePaused)
-{
-	Super::PreProcessInput(DeltaTime, bGamePaused);
-}
-
-void ACustomPlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)
-{
-	if (CustomASC)
-	{
-		CustomASC->ProcessAbilityInput(DeltaTime, bGamePaused);
-	}
-	
-	Super::PostProcessInput(DeltaTime, bGamePaused);
-}
-
 UCustomAbilitySystemComponent* ACustomPlayerController::GetCustomASC() const
 {
 	return CustomASC;
@@ -117,13 +123,7 @@ void ACustomPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 EDataValidationResult ACustomPlayerController::IsDataValid(FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
-
-	if (!InputConfig)
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::FromString("InputConfig is not set!"));
-	}
-
+	
 	if (InputMappingContexts.Num() <= 0)
 	{
 		Result = EDataValidationResult::Invalid;

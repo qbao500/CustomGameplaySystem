@@ -24,9 +24,6 @@ ACustomPawnBase::ACustomPawnBase()
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = true;
 
-	// For AI
-	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
 	// Capsule component
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CollisionCylinder");
 	CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
@@ -218,12 +215,13 @@ FVector ACustomPawnBase::GetFootLocation_Implementation() const
 
 bool ACustomPawnBase::IsAlive_Implementation()
 {
-	return HealthComponent->GetHealth() > 0.0f;
+	return true;
+	//return HealthComponent->GetHealth() > 0.0f;
 }
 
 bool ACustomPawnBase::IsOnAir_Implementation() const
 {
-	// Should override in child class in needed
+	// Should override in child class if needed
 	return false;
 }
 

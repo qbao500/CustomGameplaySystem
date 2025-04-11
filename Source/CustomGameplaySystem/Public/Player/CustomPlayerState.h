@@ -26,6 +26,10 @@ public:
 
 	ACustomPlayerState();
 
+	//~ Begin AActor interface
+	virtual void PostInitializeComponents() override;
+	//~ End AActor interface
+
 	//~ Begin APlayerState interface
 	virtual void ClientInitialize(AController* C) override;
 	//~ End APlayerState interface

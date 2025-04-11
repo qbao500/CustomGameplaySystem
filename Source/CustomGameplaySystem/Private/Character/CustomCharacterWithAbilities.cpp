@@ -12,6 +12,9 @@ ACustomCharacterWithAbilities::ACustomCharacterWithAbilities()
 	AbilitySystemComponent = CreateDefaultSubobject<UCustomAbilitySystemComponent>("Ability System Component");
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	
+	// AbilitySystemComponent needs to be updated at a high frequency.
+	NetUpdateFrequency = 100.0f;
 
 	HealthSet = CreateDefaultSubobject<UHealthAttributeSet>("HealthSet");
 }

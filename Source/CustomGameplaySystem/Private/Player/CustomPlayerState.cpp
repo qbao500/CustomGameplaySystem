@@ -31,6 +31,14 @@ ACustomPlayerState::ACustomPlayerState()
 	LevelExpComponent = CreateDefaultSubobject<ULevelExpComponent>("Level Exp Component");
 }
 
+void ACustomPlayerState::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	check(AbilitySystemComponent);
+	AbilitySystemComponent->InitAbilityActorInfo(this, GetPawn());
+}
+
 void ACustomPlayerState::ClientInitialize(AController* C)
 {
 	Super::ClientInitialize(C);
@@ -80,7 +88,8 @@ AActor* ACustomPlayerState::FindNearestPlayer(const FVector& CheckingLocation,
 
 		if (bCheckAlive && UKismetSystemLibrary::DoesImplementInterface(PlayerActor, UCombatInterface::StaticClass()))
 		{
-			if (!ICombatInterface::Execute_IsAlive(PlayerActor)) continue;
+			const bool bIsAlive = ICombatInterface::Execute_IsAlive(PlayerActor);
+			if (!bIsAlive) continue;
 		}
 		
 		const FVector Loc = PlayerActor->GetActorLocation();

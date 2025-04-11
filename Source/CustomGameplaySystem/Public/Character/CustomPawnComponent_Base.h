@@ -21,11 +21,7 @@ public:
 
 	UCustomPawnComponent_Base(const FObjectInitializer& ObjectInitializer);
 
-	/** The name of this overall feature. Please declare in cpp file of child class. */
-	static const FName NAME_ActorFeatureName;
-
 	//~ Begin IGameFrameworkInitStateInterface interface
-	virtual FName GetFeatureName() const override;
 	virtual void CheckDefaultInitialization() override;
 	//~ End IGameFrameworkInitStateInterface interface
 
@@ -49,11 +45,15 @@ public:
 	virtual void HandlePlayerStateReplicated();
 
 	/** Should be called by the owning pawn when the input component is setup. */
-	void SetupPlayerInputComponent();
+	virtual void SetupPlayerInputComponent();
 
 protected:
 
+	//~ Begin UActorComponent interface
 	virtual void OnRegister() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	//~ End UActorComponent interface
+
+	static APawn* FindPawnFromActor(AActor* Actor);
 };

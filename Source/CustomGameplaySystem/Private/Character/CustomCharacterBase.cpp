@@ -23,9 +23,6 @@ ACustomCharacterBase::ACustomCharacterBase()
 	HealthComponent = CreateDefaultSubobject<UCustomHealthComponent>("Health Component");
 
 	GetMesh()->bEnableUpdateRateOptimizations = true;
-
-	// For AI
-	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 void ACustomCharacterBase::PostInitializeComponents()
