@@ -11,6 +11,7 @@
  * Since it's local, no replication is needed.
  * While CustomCorePawnComponent is already added to CustomPawnBase and CustomCharacterBase,
  * this component needs to be manually added to your child Pawn class, which is controlled by a Player.
+ * Nevertheless, this component needs CustomCorePawnComponent to be added to the same Pawn, to work correctly.
  */
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
 class CUSTOMGAMEPLAYSYSTEM_API UCustomLocalPawnComponent : public UCustomPawnComponent_Base

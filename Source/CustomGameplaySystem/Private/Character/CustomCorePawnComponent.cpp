@@ -94,10 +94,8 @@ bool UCustomCorePawnComponent::CanChangeInitState(UGameFrameworkComponentManager
 			PLFL::PrintError("Require PawnData for CustomCorePawnComponent on " + GetNameSafe(Pawn));
 			return false;
 		}
-
-		const bool bHasAuthority = Pawn->HasAuthority();
-		const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
-		if (bHasAuthority || bIsLocallyControlled)
+		
+		if (IsAuthorityOrLocal())
 		{
 			// Check for being possessed by a controller.
 			if (!GetController<AController>())
@@ -127,29 +125,26 @@ void UCustomCorePawnComponent::HandleChangeInitState(UGameFrameworkComponentMana
 {
 	if (CurrentState == CustomTags::InitState_DataAvailable && DesiredState == CustomTags::InitState_DataInitialized)
 	{
-		/*if (!IsAuthorityOrLocal()) return;
-		
-		APawn* Pawn = GetPawn<APawn>();
-		ACustomPlayerState* CustomPS = GetPlayerState<ACustomPlayerState>();
-		if (!ensure(Pawn))
-		{
-			return;
-		}
+		APawn* Pawn = GetPawnChecked<APawn>();
+
+		// ASC doesn't care about Simulated Proxy
+		if (Pawn->GetLocalRole() == ROLE_SimulatedProxy) return;
 
 		// The PlayerState holds the persistent data (state that persists across deaths and multiple Pawns).
 		// The AbilitySystemComponent and AttributeSets live on the PlayerState.
-		if (CustomPS)
+		if (ACustomPlayerState* CustomPS = GetPlayerState<ACustomPlayerState>())
 		{
+			// This Player (or AI) has a valid PlayerState. Now Initialize the ASC.
 			InitializeAbilitySystem(CustomPS->GetCustomAbilitySystemComponent(), CustomPS);
 		}
 		else
 		{
-			// If PlayerState is not valid, it's most likely this is an AI
-			// The AI Pawn must have a valid CustomAbilitySystemComponent
+			// If PlayerState is not valid, it's most likely this is an AI.
+			// The AI Pawn must have a valid CustomAbilitySystemComponent.
 			UCustomAbilitySystemComponent* CustomASC = CastChecked<UCustomAbilitySystemComponent>(
 				UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Pawn));
 			InitializeAbilitySystem(CustomASC, Pawn);
-		}*/
+		}
 	}
 }
 

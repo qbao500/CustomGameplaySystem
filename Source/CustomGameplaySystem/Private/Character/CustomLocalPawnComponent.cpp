@@ -120,19 +120,25 @@ void UCustomLocalPawnComponent::HandleChangeInitState(UGameFrameworkComponentMan
 	if (CurrentState == CustomTags::InitState_DataAvailable && DesiredState == CustomTags::InitState_DataInitialized)
 	{
 		APawn* Pawn = GetPawn<APawn>();
-		ACustomPlayerState* CustomPS = GetPlayerState<ACustomPlayerState>();
+		const ACustomPlayerState* CustomPS = GetPlayerState<ACustomPlayerState>();
 		if (!ensure(Pawn && CustomPS))
 		{
 			return;
 		}
 
-		const UCustomPawnData* PawnData = nullptr;
-		if (UCustomCorePawnComponent* CorePawnComp = UCustomCorePawnComponent::FindCorePawnComponent(Pawn))
+		// This component still depends on the CorePawnComponent
+		const UCustomCorePawnComponent* CorePawnComp = UCustomCorePawnComponent::FindCorePawnComponent(Pawn);
+		if (!ensure(CorePawnComp))
 		{
-			PawnData = CorePawnComp->GetPawnData();
-			// The player state holds the persistent data for this player (state that persists across deaths and multiple pawns).
-			// The ability system component and attribute sets live on the player state.
-			CorePawnComp->InitializeAbilitySystem(CustomPS->GetCustomAbilitySystemComponent(), CustomPS);
+			PLFL::PrintError("Require CorePawnComponent for CustomLocalPawnComponent on " + GetNameSafe(Pawn));
+			return;
+		}
+		
+		const UCustomPawnData* PawnData = CorePawnComp->GetPawnData();
+		if (!PawnData)
+		{
+			PLFL::PrintError("Require PawnData for CustomCorePawnComponent on " + GetNameSafe(Pawn));
+			return;
 		}
 
 		// Handle setup Player Controller input
