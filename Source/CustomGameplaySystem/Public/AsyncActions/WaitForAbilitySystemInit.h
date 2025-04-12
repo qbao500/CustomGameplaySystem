@@ -18,7 +18,9 @@ class CUSTOMGAMEPLAYSYSTEM_API UWaitForAbilitySystemInit : public UCancellableAs
 public:
 
 	UFUNCTION(BlueprintCallable, Category = "Ability|AsyncAction", meta = (BlueprintInternalUseOnly = "true"))
-	static UWaitForAbilitySystemInit* WaitForAbilitySystemInit(APawn* PawnWithCorePawnComponent);
+	static UWaitForAbilitySystemInit* WaitForAbilityComponentInit(APawn* PawnWithCorePawnComponent);
+	UFUNCTION(BlueprintCallable, Category = "Ability|AsyncAction", meta = (BlueprintInternalUseOnly = "true"))
+	static UWaitForAbilitySystemInit* WaitForAbilityComponentInitWithCoreComp(UCustomCorePawnComponent* CorePawnComponent);
 
 	UPROPERTY(BlueprintAssignable)
 	FAbilityComponentInitialized OnAbilitySystemInitialized;
@@ -28,7 +30,7 @@ public:
 private:
 
 	UPROPERTY()
-	TObjectPtr<UCustomCorePawnComponent> CorePawnComponent;
+	TObjectPtr<UCustomCorePawnComponent> CorePawnComp;
 
 	UFUNCTION()
 	void AbilitySystemInitialized(UCustomAbilitySystemComponent* CustomASC);

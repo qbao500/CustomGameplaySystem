@@ -5,16 +5,28 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(WaitForAbilitySystemInit)
 
-UWaitForAbilitySystemInit* UWaitForAbilitySystemInit::WaitForAbilitySystemInit(APawn* PawnWithCorePawnComponent)
+UWaitForAbilitySystemInit* UWaitForAbilitySystemInit::WaitForAbilityComponentInit(APawn* PawnWithCorePawnComponent)
 {
 	if (!PawnWithCorePawnComponent) return nullptr;
 
-	UCustomCorePawnComponent* CorePawnComp = UCustomCorePawnComponent::FindCorePawnComponent(PawnWithCorePawnComponent);
-	if (!CorePawnComp) return nullptr;
+	UCustomCorePawnComponent* CorePawn = UCustomCorePawnComponent::FindCorePawnComponent(PawnWithCorePawnComponent);
+	if (!CorePawn) return nullptr;
 
 	UWaitForAbilitySystemInit* Node = NewObject<UWaitForAbilitySystemInit>();
-	Node->CorePawnComponent = CorePawnComp;
+	Node->CorePawnComp = CorePawn;
 	Node->RegisterWithGameInstance(PawnWithCorePawnComponent);
+	
+	return Node;
+}
+
+UWaitForAbilitySystemInit* UWaitForAbilitySystemInit::WaitForAbilityComponentInitWithCoreComp(
+	UCustomCorePawnComponent* CorePawnComponent)
+{
+	if (!CorePawnComponent) return nullptr;
+
+	UWaitForAbilitySystemInit* Node = NewObject<UWaitForAbilitySystemInit>();
+	Node->CorePawnComp = CorePawnComponent;
+	Node->RegisterWithGameInstance(CorePawnComponent);
 	
 	return Node;
 }
@@ -25,7 +37,7 @@ void UWaitForAbilitySystemInit::Activate()
 
 	FAbilityComponentInitialized::FDelegate Del;
 	Del.BindDynamic(this, &UWaitForAbilitySystemInit::AbilitySystemInitialized);
-	CorePawnComponent->OnAbilitySystemInitialized_RegisterAndCall(Del);
+	CorePawnComp->OnAbilitySystemInitialized_RegisterAndCall(Del);
 }
 
 void UWaitForAbilitySystemInit::AbilitySystemInitialized(UCustomAbilitySystemComponent* CustomASC)
