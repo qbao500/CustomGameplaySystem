@@ -9,8 +9,7 @@
 class UCustomPawnData;
 class UCustomAbilitySystemComponent;
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FAbilityComponentInitialized, UCustomAbilitySystemComponent*, AbilitySystemComponent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityComponentInitializedMulticast, UCustomAbilitySystemComponent*, AbilitySystemComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityComponentInitialized, UCustomAbilitySystemComponent*, AbilitySystemComponent);
 
 /**
  * Component that adds functionality to all Pawn classes so it can be used for characters/vehicles/etc.
@@ -56,8 +55,7 @@ public:
 	void UninitializeAbilitySystem();
 
 	/** Register with the OnAbilitySystemInitialized delegate and broadcast if our pawn has been registered with the ability system component */
-	UFUNCTION(BlueprintCallable)
-	void OnAbilitySystemInitialized_RegisterAndCall(const FAbilityComponentInitialized& Delegate, const bool bOnceOnly = true);
+	void OnAbilitySystemInitialized_RegisterAndCall(const FAbilityComponentInitialized::FDelegate& Delegate);
 
 	/** Register with the OnAbilitySystemUninitialized delegate fired when our pawn is removed as the ability system's avatar actor */
 	void OnAbilitySystemUninitialized_Register(const FSimpleMulticastDelegate::FDelegate& Delegate);
@@ -72,7 +70,7 @@ protected:
 	//~ End UActorComponent interface
 
 	/** Delegate fired when our pawn becomes the ability system's avatar actor */
-	FAbilityComponentInitializedMulticast OnAbilitySystemInitialized;
+	FAbilityComponentInitialized OnAbilitySystemInitialized;
 
 	/** Delegate fired when our pawn is removed as the ability system's avatar actor */
 	FSimpleMulticastDelegate OnAbilitySystemUninitialized;
@@ -91,9 +89,6 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void Server_GrantAbilitySets();
-
-	UPROPERTY()
-	TSet<const UObject*> ListenOnceObjects;
 
 	void BroadcastAbilitySystemInitialized();
 

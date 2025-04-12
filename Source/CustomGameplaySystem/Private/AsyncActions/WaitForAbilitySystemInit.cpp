@@ -23,7 +23,7 @@ void UWaitForAbilitySystemInit::Activate()
 {
 	Super::Activate();
 
-	FAbilityComponentInitialized Del;
+	FAbilityComponentInitialized::FDelegate Del;
 	Del.BindDynamic(this, &UWaitForAbilitySystemInit::AbilitySystemInitialized);
 	CorePawnComponent->OnAbilitySystemInitialized_RegisterAndCall(Del);
 }

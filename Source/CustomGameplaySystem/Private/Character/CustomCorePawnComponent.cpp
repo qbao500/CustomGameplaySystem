@@ -248,19 +248,15 @@ void UCustomCorePawnComponent::UninitializeAbilitySystem()
 		}
 
 		OnAbilitySystemUninitialized.Broadcast();
+		OnAbilitySystemUninitialized.Clear();
 	}
 
 	AbilitySystemComponent = nullptr;
 }
 
-void UCustomCorePawnComponent::OnAbilitySystemInitialized_RegisterAndCall(const FAbilityComponentInitialized& Delegate, const bool bOnceOnly)
+void UCustomCorePawnComponent::OnAbilitySystemInitialized_RegisterAndCall(const FAbilityComponentInitialized::FDelegate& Delegate)
 {
 	OnAbilitySystemInitialized.AddUnique(Delegate);
-
-	if (bOnceOnly)
-	{
-		ListenOnceObjects.Emplace(Delegate.GetUObject());
-	}
 
 	if (AbilitySystemComponent)
 	{
@@ -318,14 +314,7 @@ void UCustomCorePawnComponent::Server_GrantAbilitySets_Implementation()
 void UCustomCorePawnComponent::BroadcastAbilitySystemInitialized()
 {
 	OnAbilitySystemInitialized.Broadcast(AbilitySystemComponent);
-	
-	// Copy and clear first, in case the array is modified during the removal.
-	TSet<const UObject*> ListenOnceDelegatesCopy = ListenOnceObjects;
-	ListenOnceObjects.Empty();
-	for (const UObject* Object : ListenOnceDelegatesCopy)
-	{
-		OnAbilitySystemInitialized.RemoveAll(Object);
-	}
+	OnAbilitySystemInitialized.Clear();
 }
 
 bool UCustomCorePawnComponent::IsAuthorityOrLocal() const

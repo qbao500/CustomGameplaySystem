@@ -195,8 +195,6 @@ void UAbilityStatusComponent::Multicast_UnlockAbility_Implementation(const FGame
 void UAbilityStatusComponent::Multicast_EquipAbility_Implementation(const FGameplayTag& AbilityTag,
 	const FGameplayTag& OptionalInputTag)
 {
-	check(AbilitySystemComponent);
-
 	if (const FAbilityStatus* StatusInfo = AbilityStatusMap.Find(AbilityTag))
 	{
 		GiveAbility(AbilityTag, StatusInfo->AbilityLevel, OptionalInputTag);
@@ -205,8 +203,6 @@ void UAbilityStatusComponent::Multicast_EquipAbility_Implementation(const FGamep
 
 void UAbilityStatusComponent::Multicast_UnequipAbility_Implementation(const FGameplayTag& AbilityTag)
 {
-	check(AbilitySystemComponent);
-	
 	RemoveAbility(AbilityTag);
 }
 
@@ -234,15 +230,16 @@ void UAbilityStatusComponent::OnPlayerPawnSet(APlayerState* Player, APawn* NewPa
 	UCustomCorePawnComponent* CorePawnComponent = UCustomCorePawnComponent::FindCorePawnComponent(NewPawn);
 	if (!CorePawnComponent) return;
 
-	FAbilityComponentInitialized Delegate;
+	FAbilityComponentInitialized::FDelegate Delegate;
 	Delegate.BindDynamic(this, &ThisClass::OnAbilitySystemInitialized);
-	CorePawnComponent->OnAbilitySystemInitialized_RegisterAndCall(Delegate, true);
+	CorePawnComponent->OnAbilitySystemInitialized_RegisterAndCall(Delegate);
 }
 
 void UAbilityStatusComponent::OnAbilitySystemInitialized(UCustomAbilitySystemComponent* ASC)
 {
+	check(ASC);
+	
 	AbilitySystemComponent = ASC;
-	if (!AbilitySystemComponent) return;
 
 	FAbilityGiven Delegate;
 	Delegate.BindDynamic(this, &ThisClass::OnAbilityGiven);
@@ -381,6 +378,8 @@ void UAbilityStatusComponent::GiveAbility(const FGameplayTag& AbilityTag, const 
 {
 	if (!HasAuthority() || !AbilityTag.IsValid()) return;
 
+	check(AbilitySystemComponent);
+
 	// After the ability is actually given, the OnAbilityGiven will be called, which will set the status to Equipped
 	// This guarantees that the ability information in ASC is up-to-date when OnAbilityStatusChanged is called
 	AbilitySystemComponent->GiveAbilityByTag(AbilityTag, Level, OptionalInputTag);
@@ -389,6 +388,8 @@ void UAbilityStatusComponent::GiveAbility(const FGameplayTag& AbilityTag, const 
 void UAbilityStatusComponent::RemoveAbility(const FGameplayTag& AbilityTag) const
 {
 	if (!HasAuthority() || !AbilityTag.IsValid()) return;
+
+	check(AbilitySystemComponent);
 
 	// After the ability is actually removed, the OnAbilityRemoved will be called, which will set the status to Unlocked
 	AbilitySystemComponent->RemoveAbilityByTag(AbilityTag);

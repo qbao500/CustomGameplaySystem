@@ -54,9 +54,9 @@ void ACustomPawnBase::PostInitializeComponents()
 		MovementComponent->UpdateNavAgent(*CapsuleComponent);
 	}
 
-	FAbilityComponentInitialized Delegate;
+	FAbilityComponentInitialized::FDelegate Delegate;
 	Delegate.BindDynamic(this, &ThisClass::OnAbilitySystemInitialized);
-	CorePawnComponent->OnAbilitySystemInitialized_RegisterAndCall(Delegate, true);
+	CorePawnComponent->OnAbilitySystemInitialized_RegisterAndCall(Delegate);
 	CorePawnComponent->OnAbilitySystemUninitialized_Register(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemUninitialized));
 }
 

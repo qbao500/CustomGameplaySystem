@@ -21,7 +21,7 @@ public:
 	static UWaitForAbilitySystemInit* WaitForAbilitySystemInit(APawn* PawnWithCorePawnComponent);
 
 	UPROPERTY(BlueprintAssignable)
-	FAbilityComponentInitializedMulticast OnAbilitySystemInitialized;
+	FAbilityComponentInitialized OnAbilitySystemInitialized;
 
 	virtual void Activate() override;
 
