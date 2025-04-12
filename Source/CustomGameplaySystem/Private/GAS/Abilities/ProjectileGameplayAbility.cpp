@@ -152,6 +152,23 @@ void UProjectileGameplayAbility::LoadProjectile()
 
 void UProjectileGameplayAbility::OnReceiveAutoLaunchEvent(FGameplayEventData Payload)
 {
+	bool bCanLaunch = true;
+	if (bAutoLaunchCommitCost && bAutoLaunchCommitCooldown)
+	{
+		bCanLaunch = K2_CommitAbility();
+	}
+	else if (bAutoLaunchCommitCost)
+	{
+		bCanLaunch = K2_CommitAbilityCost();
+	}
+	else if (bAutoLaunchCommitCooldown)
+	{
+		bCanLaunch = K2_CommitAbilityCooldown();
+	}
+
+	// Don't do anything if we can't launch
+	if (!bCanLaunch) return;
+	
 	const FVector& TargetLocation = GetTargetLocationForAutoLaunch();
 	FProjectileHomingInfo HomingInfo;
 

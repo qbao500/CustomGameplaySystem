@@ -48,11 +48,15 @@ protected:
 	// Override (optional) GetTargetLocationForAutoLaunch() if this is true. Otherwise it will launch forward.
 	// If false, you can manually launch projectile with SpawnProjectileAndLaunch().
 	// You can override OnProjectileLaunched() to do something after projectile is launched.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Auto Launch")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AutoLaunch")
 	bool bAutoLaunchWhenReceiveEvent = true;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Auto Launch", meta = (Categories = "Event", EditCondition = "bAutoLaunchWhenReceiveEvent"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AutoLaunch", meta = (Categories = "Event", EditCondition = "bAutoLaunchWhenReceiveEvent"))
 	FGameplayTag LaunchEventToListen = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Auto Launch", meta = (EditCondition = "bAutoLaunchWhenReceiveEvent"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AutoLaunch|Commit", meta = (EditCondition = "bAutoLaunchWhenReceiveEvent"))
+	bool bAutoLaunchCommitCost = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AutoLaunch|Commit", meta = (EditCondition = "bAutoLaunchWhenReceiveEvent"))
+	bool bAutoLaunchCommitCooldown = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AutoLaunch", meta = (EditCondition = "bAutoLaunchWhenReceiveEvent"))
 	bool bAutoLaunchHoming = false;
 
 	// If true, the ability will end after projectile is launched.
