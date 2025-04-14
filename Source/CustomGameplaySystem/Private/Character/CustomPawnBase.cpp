@@ -5,9 +5,9 @@
 
 #include "CustomGameplayTags.h"
 #include "Character/CustomCorePawnComponent.h"
+#include "Character/CustomFloatingPawnMovement.h"
 #include "Character/CustomHealthComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/PlayerState.h"
 #include "GAS/Components/CustomAbilitySystemComponent.h"
 
@@ -35,7 +35,7 @@ ACustomPawnBase::ACustomPawnBase()
 	SetRootComponent(CapsuleComponent);
 
 	// Movement component
-	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement Component"));
+	MovementComponent = CreateDefaultSubobject<UCustomFloatingPawnMovement>(TEXT("Movement Component"));
 	MovementComponent->UpdatedComponent = CapsuleComponent;
 
 	// For GAS
@@ -260,9 +260,31 @@ UCapsuleComponent* ACustomPawnBase::GetCapsuleComponent() const
 	return CapsuleComponent;
 }
 
-UFloatingPawnMovement* ACustomPawnBase::GetPawnMovement() const
+UCustomFloatingPawnMovement* ACustomPawnBase::GetPawnMovement() const
 {
 	return MovementComponent;
+}
+
+void ACustomPawnBase::LaunchPawn(const FVector& LaunchVelocity, const bool bXYOverride, const bool bZOverride)
+{
+	check(MovementComponent);
+
+	FVector FinalVel = LaunchVelocity;
+	const FVector Velocity = GetVelocity();
+
+	if (!bXYOverride)
+	{
+		FinalVel.X += Velocity.X;
+		FinalVel.Y += Velocity.Y;
+	}
+	if (!bZOverride)
+	{
+		FinalVel.Z += Velocity.Z;
+	}
+
+	MovementComponent->Launch(FinalVel);
+
+	OnLaunched(LaunchVelocity, bXYOverride, bZOverride);
 }
 
 void ACustomPawnBase::InitStartUpAbilities()

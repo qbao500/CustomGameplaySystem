@@ -11,7 +11,7 @@
 #include "Interfaces/LevelExpInterface.h"
 #include "CustomPawnBase.generated.h"
 
-class UFloatingPawnMovement;
+class UCustomFloatingPawnMovement;
 class UCustomHealthComponent;
 class UGameplayAbility;
 class UCustomCorePawnComponent;
@@ -80,10 +80,15 @@ public:
 	UFUNCTION(BlueprintPure)
 	UCapsuleComponent* GetCapsuleComponent() const;
 	UFUNCTION(BlueprintPure)
-	UFloatingPawnMovement* GetPawnMovement() const;
+	UCustomFloatingPawnMovement* GetPawnMovement() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Launch")
+	void LaunchPawn(const FVector& LaunchVelocity, const bool bXYOverride = true, const bool bZOverride = true);
+	UFUNCTION(BlueprintImplementableEvent, Category = "Launch")
+	void OnLaunched(const FVector& LaunchVelocity, const bool bXYOverride, const bool bZOverride);
 
 	// Used when rotate to Controller's rotation
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pawn)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn")
 	float SmoothRotationSpeed = 10.0f;
 
 protected:
@@ -112,7 +117,7 @@ protected:
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UFloatingPawnMovement> MovementComponent;
+	TObjectPtr<UCustomFloatingPawnMovement> MovementComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCapsuleComponent> CapsuleComponent;
 };
