@@ -12,9 +12,18 @@
 
 UAsyncMoveActorToLocation* UAsyncMoveActorToLocation::AsyncMoveActorToLocation(const FMoveActorInfo& MoveInfo, const FMoveActorSettings& MoveSettings)
 {
-	if (!MoveInfo.ActorToMove) return nullptr;
+	if (!MoveInfo.ActorToMove.Get()) return nullptr;
+
+	// If somehow the settings have both of these values true, then don't do anything
+	if (MoveSettings.bIgnoreXY && MoveSettings.bIgnoreZ)
+	{
+		return nullptr;
+	}
 
 	UAsyncMoveActorToLocation* Node = NewObject<UAsyncMoveActorToLocation>();
+	
+	// Cache MoveSettings
+	Node->MoveSettings = MoveSettings;
 
 	// Cache MoveInfo
 	Node->MoveInfo = MoveInfo;
@@ -23,16 +32,13 @@ UAsyncMoveActorToLocation* UAsyncMoveActorToLocation::AsyncMoveActorToLocation(c
 	{
 		Node->CharacterMoveComp = Character->GetCharacterMovement();
 	}
-
-	// Cache MoveSettings
-	Node->MoveSettings = MoveSettings;
-
+	
 	// Trace ground if applicable
 	if (MoveSettings.bTraceGroundIfCharacter && Node->CharacterMoveComp.IsValid())
 	{
 		FHitResult HitResult;
 		const FVector Start = MoveInfo.TargetLocation + FVector::UpVector * 50;
-		const FVector End = MoveInfo.TargetLocation - FVector::UpVector * 200;
+		const FVector End = MoveInfo.TargetLocation + FVector::UpVector * -200;
 		if (MoveInfo.ActorToMove->GetWorld()->LineTraceSingleByObjectType(HitResult, Start, End, ECC_WorldStatic))
 		{
 			FVector NewTarget = HitResult.ImpactPoint;
@@ -43,7 +49,7 @@ UAsyncMoveActorToLocation* UAsyncMoveActorToLocation::AsyncMoveActorToLocation(c
 	}
 
 	// Register to not get Garbage Collection while running
-	Node->RegisterWithGameInstance(MoveInfo.ActorToMove);
+	Node->RegisterWithGameInstance(MoveInfo.ActorToMove.Get());
 
 	return Node;
 }
@@ -69,7 +75,8 @@ void UAsyncMoveActorToLocation::Cancel()
 
 void UAsyncMoveActorToLocation::Tick(float DeltaTime)
 {
-	if (!MoveInfo.ActorToMove)
+	AActor* ActorToMove = MoveInfo.ActorToMove.Get();
+	if (!ActorToMove)
 	{
 		EndMove(true);
 		return;
@@ -85,10 +92,22 @@ void UAsyncMoveActorToLocation::Tick(float DeltaTime)
 	const float DeltaProgress = DeltaTime / MoveSettings.Duration / MoveInfo.ActorToMove->CustomTimeDilation;
 	ProgressAlpha = FMath::Clamp(ProgressAlpha + DeltaProgress, 0.0f, 1.0f);
 	const float MoveAlpha = FAlphaBlend::AlphaToBlendOption(ProgressAlpha, MoveSettings.EasingFunc, MoveSettings.EasingCurve);
-	const FVector Location = FMath::Lerp<FVector, float>(MoveInfo.FromLocation, MoveInfo.TargetLocation, MoveAlpha);
+
+	// Calculate the new location
+	FVector NewLocation = FMath::Lerp<FVector, float>(MoveInfo.FromLocation, MoveInfo.TargetLocation, MoveAlpha);
+	if (MoveSettings.bIgnoreZ)
+	{
+		NewLocation.Z = ActorToMove->GetActorLocation().Z;
+	}
+	else if (MoveSettings.bIgnoreXY)
+	{
+		const FVector ActorLocation = ActorToMove->GetActorLocation();
+		NewLocation.X = ActorLocation.X;
+		NewLocation.Y = ActorLocation.Y;
+	}
 
 	const bool bSweep = MoveSettings.bSweepCollisionWhileMoving || (MoveSettings.ProgressToEnableCollision > 0.0f && ProgressAlpha >= MoveSettings.ProgressToEnableCollision);
-	const bool bSuccess = MoveInfo.ActorToMove->SetActorLocation(Location, bSweep);
+	const bool bSuccess = ActorToMove->SetActorLocation(NewLocation, bSweep);
 
 	if (bSuccess)
 	{
@@ -135,5 +154,5 @@ void UAsyncMoveActorToLocation::EndMove(const bool bInterrupted)
 
 UWorld* UAsyncMoveActorToLocation::GetWorld() const
 {
-	return MoveInfo.ActorToMove ? MoveInfo.ActorToMove->GetWorld() : nullptr;
+	return MoveInfo.ActorToMove.Get() ? MoveInfo.ActorToMove->GetWorld() : nullptr;
 }
