@@ -173,7 +173,7 @@ void UCustomHealthComponent::HandleOutOfHealth(AActor* DamageInstigator, AActor*
 #if WITH_SERVER_CODE
 	if (AbilitySystemComponent && DamageEffectSpec)
 	{
-		// Send the "GameplayEvent.Death" gameplay event through the owner's ability system.  This is used to trigger a death gameplay ability.
+		// Send the "Event.Character.Death" gameplay event through the owner's ability system.  This is used to trigger a death gameplay ability.
 		
 		FGameplayEventData Payload;
 		Payload.EventTag = CustomTags::Event_Character_Death;

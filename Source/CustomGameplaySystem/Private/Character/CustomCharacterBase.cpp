@@ -238,7 +238,7 @@ void ACustomCharacterBase::OnAbilitySystemUninitialized()
 	HealthComponent->UninitializeFromAbilitySystem();
 }
 
-void ACustomCharacterBase::DisableMovementAndCollision() const
+void ACustomCharacterBase::DisableMovementAndCollision(const bool bStopActiveMovementImmediately) const
 {
 	if (Controller)
 	{
@@ -250,10 +250,13 @@ void ACustomCharacterBase::DisableMovementAndCollision() const
 	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CapsuleComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 
-	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
-	check(MoveComp);
-	MoveComp->StopMovementImmediately();
-	MoveComp->DisableMovement();
+	if (bStopActiveMovementImmediately)
+	{
+		UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+		check(MoveComp);
+		MoveComp->DisableMovement();
+		MoveComp->StopMovementImmediately();
+	}
 }
 
 void ACustomCharacterBase::UninitAndDestroy()

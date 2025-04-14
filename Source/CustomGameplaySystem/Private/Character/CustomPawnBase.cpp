@@ -323,7 +323,7 @@ void ACustomPawnBase::OnAbilitySystemUninitialized()
 	HealthComponent->UninitializeFromAbilitySystem();
 }
 
-void ACustomPawnBase::DisableMovementAndCollision() const
+void ACustomPawnBase::DisableMovementAndCollision(const bool bStopActiveMovementImmediately) const
 {
 	if (Controller)
 	{
@@ -335,9 +335,12 @@ void ACustomPawnBase::DisableMovementAndCollision() const
 	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CapsuleComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 
-	UPawnMovementComponent* MoveComp = GetMovementComponent();
-	check(MoveComp);
-	MoveComp->StopMovementImmediately();
+	if (bStopActiveMovementImmediately)
+	{
+		UPawnMovementComponent* MoveComp = GetMovementComponent();
+		check(MoveComp);
+		MoveComp->StopMovementImmediately();
+	}
 }
 
 void ACustomPawnBase::UninitAndDestroy()

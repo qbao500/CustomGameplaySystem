@@ -91,7 +91,7 @@ protected:
 	virtual void OnAbilitySystemInitialized(UCustomAbilitySystemComponent* CustomASC);
 	virtual void OnAbilitySystemUninitialized();
 
-	void DisableMovementAndCollision() const;
+	void DisableMovementAndCollision(const bool bStopActiveMovementImmediately = true) const;
 	void UninitAndDestroy();
 
 	void ApplyEffectToSelf(const TSubclassOf<UGameplayEffect>& Effect, const float Level = 1.0f) const;

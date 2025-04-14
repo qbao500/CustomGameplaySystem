@@ -75,5 +75,7 @@ void UExecCalc_SimpleDamage::Execute_Implementation(const FGameplayEffectCustomE
 	Payload.EventMagnitude = Damage;
 	Payload.Instigator = SourceASC->GetOwnerActor();
 	Payload.Target = TargetASC->GetOwnerActor();
+	Payload.InstigatorTags = *EvaluateParameters.SourceTags;
+	Payload.TargetTags = *EvaluateParameters.TargetTags;
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(SourceASC->GetOwnerActor(), CustomTags::Event_Hit, Payload);
 }

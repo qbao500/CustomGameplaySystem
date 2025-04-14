@@ -44,6 +44,7 @@ namespace CustomTags
 
 	// Event tags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Hit, "Event.Hit", "Event when Ability hit target");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Character_Knockback, "Event.Character.Knockback", "Knockback event for Characters");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Character_Death, "Event.Character.Death", "Death event for Characters");
 
 	// Damage tags
