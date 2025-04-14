@@ -11,7 +11,8 @@ class UHealthAttributeSet;
 class UCustomAbilitySystemComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCustomHealth_Death, AActor*, OwningActor, const AActor*, DeathInstigator);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FCustomHealth_AttributeChanged, UCustomHealthComponent*, HealthComponent, float, OldValue, float, NewValue, AActor*, Instigator);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FCustomHealth_AttributeChanged, UCustomHealthComponent*, HealthComponent,
+	float, OldValue, float, NewValue, AActor*, Instigator, AActor*, Causer);
 
 UENUM(BlueprintType)
 enum class EDeathState : uint8

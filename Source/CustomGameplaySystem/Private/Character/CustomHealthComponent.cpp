@@ -57,8 +57,8 @@ void UCustomHealthComponent::InitializeWithAbilitySystem(UCustomAbilitySystemCom
 
 	ClearDeadTags();
 
-	OnHealthChanged.Broadcast(this, HealthSet->GetHealth(), HealthSet->GetHealth(), nullptr);
-	OnMaxHealthChanged.Broadcast(this, HealthSet->GetHealth(), HealthSet->GetHealth(), nullptr);
+	OnHealthChanged.Broadcast(this, HealthSet->GetHealth(), HealthSet->GetHealth(), nullptr, nullptr);
+	OnMaxHealthChanged.Broadcast(this, HealthSet->GetHealth(), HealthSet->GetHealth(), nullptr, nullptr);
 }
 
 void UCustomHealthComponent::UninitializeFromAbilitySystem()
@@ -158,13 +158,13 @@ void UCustomHealthComponent::OnUnregister()
 void UCustomHealthComponent::HandleHealthChanged(AActor* DamageInstigator, AActor* DamageCauser,
 	const FGameplayEffectSpec* DamageEffectSpec, float DamageMagnitude, float OldValue, float NewValue)
 {
-	OnHealthChanged.Broadcast(this, OldValue, NewValue, DamageInstigator);
+	OnHealthChanged.Broadcast(this, OldValue, NewValue, DamageInstigator, DamageCauser);
 }
 
 void UCustomHealthComponent::HandleMaxHealthChanged(AActor* DamageInstigator, AActor* DamageCauser,
 	const FGameplayEffectSpec* DamageEffectSpec, float DamageMagnitude, float OldValue, float NewValue)
 {
-	OnMaxHealthChanged.Broadcast(this, OldValue, NewValue, DamageInstigator);
+	OnMaxHealthChanged.Broadcast(this, OldValue, NewValue, DamageInstigator, DamageCauser);
 }
 
 void UCustomHealthComponent::HandleOutOfHealth(AActor* DamageInstigator, AActor* DamageCauser,
@@ -173,21 +173,20 @@ void UCustomHealthComponent::HandleOutOfHealth(AActor* DamageInstigator, AActor*
 #if WITH_SERVER_CODE
 	if (AbilitySystemComponent && DamageEffectSpec)
 	{
-		// Send the "GameplayEvent.Death" gameplay event through the owner's ability system.  This can be used to trigger a death gameplay ability.
-		{
-			FGameplayEventData Payload;
-			Payload.EventTag = CustomTags::Event_Character_Death;
-			Payload.Instigator = DamageInstigator;
-			Payload.Target = AbilitySystemComponent->GetAvatarActor();
-			Payload.OptionalObject = DamageEffectSpec->Def;
-			Payload.ContextHandle = DamageEffectSpec->GetEffectContext();
-			Payload.InstigatorTags = *DamageEffectSpec->CapturedSourceTags.GetAggregatedTags();
-			Payload.TargetTags = *DamageEffectSpec->CapturedTargetTags.GetAggregatedTags();
-			Payload.EventMagnitude = DamageMagnitude;
+		// Send the "GameplayEvent.Death" gameplay event through the owner's ability system.  This is used to trigger a death gameplay ability.
+		
+		FGameplayEventData Payload;
+		Payload.EventTag = CustomTags::Event_Character_Death;
+		Payload.Instigator = DamageInstigator;
+		Payload.Target = AbilitySystemComponent->GetAvatarActor();
+		Payload.OptionalObject = DamageEffectSpec->Def;
+		Payload.ContextHandle = DamageEffectSpec->GetEffectContext();
+		Payload.InstigatorTags = *DamageEffectSpec->CapturedSourceTags.GetAggregatedTags();
+		Payload.TargetTags = *DamageEffectSpec->CapturedTargetTags.GetAggregatedTags();
+		Payload.EventMagnitude = DamageMagnitude;
 
-			FScopedPredictionWindow NewScopedWindow(AbilitySystemComponent, true);
-			AbilitySystemComponent->HandleGameplayEvent(Payload.EventTag, &Payload);
-		}
+		FScopedPredictionWindow NewScopedWindow(AbilitySystemComponent, true);
+		AbilitySystemComponent->HandleGameplayEvent(Payload.EventTag, &Payload);
 	}
 #endif
 }
