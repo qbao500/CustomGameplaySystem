@@ -129,6 +129,59 @@ UCustomAbilitySystemComponent* UCustomAbilitySystemComponent::GetCustomAbilityCo
 	return Cast<UCustomAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor));
 }
 
+void UCustomAbilitySystemComponent::CancelAbilitiesByFunc(TShouldCancelAbilityFunc ShouldCancelFunc, bool bReplicateCancelAbility)
+{
+	ABILITYLIST_SCOPE_LOCK();
+
+	for (const FGameplayAbilitySpec& AbilitySpec : ActivatableAbilities.Items)
+	{
+		if (!AbilitySpec.IsActive())
+		{
+			continue;
+		}
+
+		UCustomGameplayAbility* AbilityCDO = Cast<UCustomGameplayAbility>(AbilitySpec.Ability);
+		if (!AbilityCDO)
+		{
+			UE_LOG(LogCustom, Error, TEXT("CancelAbilitiesByFunc: Non-CustomGameplayAbility %s was Granted to ASC. Skipping."), *AbilitySpec.Ability.GetName())
+			continue;
+		}
+
+		if (AbilityCDO->InstancingPolicy != EGameplayAbilityInstancingPolicy::NonInstanced)
+		{
+			// Cancel all the spawned instances, not the CDO.
+			TArray<UGameplayAbility*> Instances = AbilitySpec.GetAbilityInstances();
+			for (UGameplayAbility* Instance : Instances)
+			{
+				UCustomGameplayAbility* CustomAbilityInstance = Cast<UCustomGameplayAbility>(Instance);
+
+				if (ShouldCancelFunc(CustomAbilityInstance, AbilitySpec.Handle))
+				{
+					if (CustomAbilityInstance->CanBeCanceled())
+					{
+						CustomAbilityInstance->CancelAbility(AbilitySpec.Handle, AbilityActorInfo.Get(),
+							CustomAbilityInstance->GetCurrentActivationInfoRef(), bReplicateCancelAbility);
+					}
+					else
+					{
+						UE_LOG(LogCustom, Error, TEXT("CancelAbilitiesByFunc: Can't cancel ability [%s] because CanBeCanceled is false."), *CustomAbilityInstance->GetName());
+					}
+				}
+			}
+		}
+		else
+		{
+			// Cancel the non-instanced ability CDO.
+			if (ShouldCancelFunc(AbilityCDO, AbilitySpec.Handle))
+			{
+				// Non-instanced abilities can always be canceled
+				check(AbilityCDO->CanBeCanceled());
+				AbilityCDO->CancelAbility(AbilitySpec.Handle, AbilityActorInfo.Get(), FGameplayAbilityActivationInfo(), bReplicateCancelAbility);
+			}
+		}
+	}
+}
+
 void UCustomAbilitySystemComponent::UpgradeAbilityLevel(const FGameplayTag& AbilityTag,
 	EAbilityUpgradeMethod UpgradeMethod, const int32 UpgradeAmount)
 {

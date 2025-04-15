@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "CustomAbilitySystemComponent.generated.h"
 
+class UCustomGameplayAbility;
 class UCustomAbilityInfoDataAsset;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAbilityGiven, const FGameplayAbilitySpec&, AbilitySpec);
@@ -49,6 +50,9 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "Custom|AbilitySystem")
 	static UCustomAbilitySystemComponent* GetCustomAbilityComponent(const AActor* Actor);
+
+	typedef TFunctionRef<bool(const UCustomGameplayAbility* CustomAbility, FGameplayAbilitySpecHandle Handle)> TShouldCancelAbilityFunc;
+	void CancelAbilitiesByFunc(TShouldCancelAbilityFunc ShouldCancelFunc, bool bReplicateCancelAbility);
 
 	UFUNCTION(BlueprintCallable, Category = "Custom|AbilitySystem", meta = (AutoCreateRefTerm = "AbilityTag", Categories = "Ability"))
 	void UpgradeAbilityLevel(const FGameplayTag& AbilityTag, EAbilityUpgradeMethod UpgradeMethod = EAbilityUpgradeMethod::Default,
