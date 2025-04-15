@@ -16,7 +16,7 @@ class CUSTOMGAMEPLAYSYSTEM_API UCustomFloatingPawnMovement : public UFloatingPaw
 
 public:
 
-	UCustomFloatingPawnMovement(const FObjectInitializer& ObjectInitializer);
+	UCustomFloatingPawnMovement(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	//~ Begin UFloatingPawnMovement interface
 	virtual void ApplyControlInputToVelocity(float DeltaTime) override;

@@ -50,6 +50,9 @@ namespace CustomTags
 	// Damage tags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Damage, "Damage", "Parent tag of damage types. You should also use this or child tags for SetByCaller");
 
+	// Game-phase tags
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GamePhase, "GamePhase", "Parent tag for game phases");
+
 	// Hitbox tags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Hitbox, "Hitbox", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Hitbox_Part, "Hitbox.Part", "Part of the body or weapon for hitbox to check (left arm, right foot, etc.). Add new parts per project needs");
