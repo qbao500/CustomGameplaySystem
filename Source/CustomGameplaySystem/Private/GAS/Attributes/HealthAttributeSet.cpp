@@ -3,8 +3,10 @@
 
 #include "GAS/Attributes/HealthAttributeSet.h"
 
+#include "CustomGameplayTags.h"
 #include "GameplayEffectExtension.h"
 #include "FunctionLibraries/PrintLogFunctionLibrary.h"
+#include "GAS/CustomAbilitySystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(HealthAttributeSet)
@@ -31,17 +33,34 @@ void UHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 {
 	Super::PostGameplayEffectExecute(Data);
 
-	AActor* Instigator = LatestEffectProps.EffectContextHandle.GetOriginalInstigator();
-	AActor* Causer = LatestEffectProps.EffectContextHandle.GetEffectCauser();
+	const FGameplayEffectContextHandle& Context = Data.EffectSpec.GetEffectContext();
+	AActor* Instigator = Context.GetOriginalInstigator();
+	AActor* Causer = Context.GetEffectCauser();
 
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
 		const float LocalIncomingDamage = GetIncomingDamage();
 		SetIncomingDamage(0.0f);
+		
 		if (LocalIncomingDamage > 0.0f)
 		{
 			const float NewHealth = GetHealth() - LocalIncomingDamage;
 			SetHealth(NewHealth);
+
+			// Notify SourceASC about the Hit
+			{
+				FGameplayEventData Payload;
+				Payload.EventTag = CustomTags::Event_Hit;
+				Payload.EventMagnitude = LocalIncomingDamage;
+				Payload.Instigator = Instigator;
+				Payload.Target = Data.Target.GetOwnerActor();
+				Payload.InstigatorTags = *Data.EffectSpec.CapturedSourceTags.GetAggregatedTags();
+				Payload.TargetTags = *Data.EffectSpec.CapturedTargetTags.GetAggregatedTags();
+
+				UAbilitySystemComponent* SourceASC = Context.GetOriginalInstigatorAbilitySystemComponent();
+				FScopedPredictionWindow NewScopedWindow(SourceASC, true);
+				SourceASC->HandleGameplayEvent(CustomTags::Event_Hit, &Payload);
+			}
 		}
 	}
 	else if (Data.EvaluatedData.Attribute == GetIncomingHealingAttribute())

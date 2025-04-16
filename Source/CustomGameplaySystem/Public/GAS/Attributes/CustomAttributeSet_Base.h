@@ -67,22 +67,16 @@ class CUSTOMGAMEPLAYSYSTEM_API UCustomAttributeSet_Base : public UAttributeSet
 
 public:
 
+	//~ Begin UObject interface
+	virtual UWorld* GetWorld() const override;
+	//~ End UObject interface
+
+	//~ Begin UAttributeSet interface
 	virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
-	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
+	//~ End UAttributeSet interface
 
 	virtual void ClampAttributeOnChange(const FGameplayAttribute& Attribute, float& NewValue) const {}
-
-	virtual UWorld* GetWorld() const override;
-
-protected:
-
-	// Set in PostGameplayEffectExecute()
-	FEffectProperties LatestEffectProps = FEffectProperties();
-
-private:
-
-	virtual void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props);
 	
 };
 
