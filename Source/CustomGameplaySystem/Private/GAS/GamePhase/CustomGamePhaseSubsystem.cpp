@@ -36,7 +36,7 @@ void UCustomGamePhaseSubsystem::StartPhase(const TSubclassOf<UCustomGamePhaseAbi
 }
 
 void UCustomGamePhaseSubsystem::WhenPhaseStartsOrIsActive(UObject* Listener, const FGameplayTag& PhaseTag,
-	const EPhaseTagMatchType MatchType, const FGamePhaseTagDelegate& WhenPhaseActive)
+	const EPhaseTagMatchType MatchType, const FGamePhaseTagDelegate& WhenPhaseActive, const bool bListenOnce)
 {
 	if (!PhaseTag.IsValid() || !Listener) return;
 	
@@ -51,11 +51,12 @@ void UCustomGamePhaseSubsystem::WhenPhaseStartsOrIsActive(UObject* Listener, con
 	Observer.PhaseTag = PhaseTag;
 	Observer.MatchType = MatchType;
 	Observer.PhaseCallback = WhenPhaseActive;
+	Observer.bObserveOnce = bListenOnce;
 	PhaseStartObservers.Emplace(Listener, Observer);
 }
 
 void UCustomGamePhaseSubsystem::WhenPhaseEnds(UObject* Listener, const FGameplayTag& PhaseTag,
-	const EPhaseTagMatchType MatchType,	const FGamePhaseTagDelegate& WhenPhaseEnd)
+	const EPhaseTagMatchType MatchType,	const FGamePhaseTagDelegate& WhenPhaseEnd, const bool bListenOnce)
 {
 	if (!PhaseTag.IsValid() || !Listener) return;
 	
@@ -63,6 +64,7 @@ void UCustomGamePhaseSubsystem::WhenPhaseEnds(UObject* Listener, const FGameplay
 	Observer.PhaseTag = PhaseTag;
 	Observer.MatchType = MatchType;
 	Observer.PhaseCallback = WhenPhaseEnd;
+	Observer.bObserveOnce = bListenOnce;
 	PhaseEndObservers.Emplace(Listener, Observer);
 }
 
@@ -81,7 +83,7 @@ void UCustomGamePhaseSubsystem::K2_StartPhase(TSubclassOf<UCustomGamePhaseAbilit
 }
 
 void UCustomGamePhaseSubsystem::K2_WhenPhaseStartsOrIsActive(UObject* Listener, const FGameplayTag& PhaseTag,
-	const EPhaseTagMatchType MatchType,	FGamePhaseTagDynamicDelegate WhenPhaseActive)
+	const EPhaseTagMatchType MatchType,	FGamePhaseTagDynamicDelegate WhenPhaseActive, const bool bListenOnce)
 {
 	if (!PhaseTag.IsValid() || !Listener) return;
 	
@@ -91,11 +93,11 @@ void UCustomGamePhaseSubsystem::K2_WhenPhaseStartsOrIsActive(UObject* Listener, 
 			WhenPhaseActive.ExecuteIfBound(PhaseTag);
 		});
 	
-	WhenPhaseStartsOrIsActive(Listener, PhaseTag, MatchType, ActiveDelegate);
+	WhenPhaseStartsOrIsActive(Listener, PhaseTag, MatchType, ActiveDelegate, bListenOnce);
 }
 
 void UCustomGamePhaseSubsystem::K2_WhenPhaseEnds(UObject* Listener, const FGameplayTag& PhaseTag,
-	const EPhaseTagMatchType MatchType,	FGamePhaseTagDynamicDelegate WhenPhaseEnd)
+	const EPhaseTagMatchType MatchType,	FGamePhaseTagDynamicDelegate WhenPhaseEnd, const bool bListenOnce)
 {
 	if (!PhaseTag.IsValid() || !Listener) return;
 	
@@ -105,7 +107,7 @@ void UCustomGamePhaseSubsystem::K2_WhenPhaseEnds(UObject* Listener, const FGamep
 			WhenPhaseEnd.ExecuteIfBound(PhaseTag);
 		});
 
-	WhenPhaseEnds(Listener, PhaseTag, MatchType, EndedDelegate);
+	WhenPhaseEnds(Listener, PhaseTag, MatchType, EndedDelegate, bListenOnce);
 }
 
 bool UCustomGamePhaseSubsystem::IsPhaseActive(const FGameplayTag& PhaseTag) const

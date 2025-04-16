@@ -47,16 +47,20 @@ public:
 
 	void StartPhase(const TSubclassOf<UCustomGamePhaseAbility>& PhaseAbility, const FGamePhaseDelegate& PhaseEndedCallback = FGamePhaseDelegate());
 	
-	void WhenPhaseStartsOrIsActive(UObject* Listener, const FGameplayTag& PhaseTag, EPhaseTagMatchType MatchType, const FGamePhaseTagDelegate& WhenPhaseActive);
-	void WhenPhaseEnds(UObject* Listener, const FGameplayTag& PhaseTag, EPhaseTagMatchType MatchType, const FGamePhaseTagDelegate& WhenPhaseEnd);
+	void WhenPhaseStartsOrIsActive(UObject* Listener, const FGameplayTag& PhaseTag, EPhaseTagMatchType MatchType,
+		const FGamePhaseTagDelegate& WhenPhaseActive, const bool bListenOnce = true);
+	void WhenPhaseEnds(UObject* Listener, const FGameplayTag& PhaseTag, EPhaseTagMatchType MatchType,
+		const FGamePhaseTagDelegate& WhenPhaseEnd, const bool bListenOnce = true);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, meta = (DisplayName="Start Phase", AutoCreateRefTerm = "PhaseEnded"))
 	void K2_StartPhase(TSubclassOf<UCustomGamePhaseAbility> PhaseAbility, const FGamePhaseDynamicDelegate& PhaseEnded);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, meta = (DisplayName = "When Phase Starts or Is Active", AutoCreateRefTerm = "WhenPhaseActive, PhaseTag", Categories = "GamePhase"))
-	void K2_WhenPhaseStartsOrIsActive(UObject* Listener, const FGameplayTag& PhaseTag, EPhaseTagMatchType MatchType, FGamePhaseTagDynamicDelegate WhenPhaseActive);
+	void K2_WhenPhaseStartsOrIsActive(UObject* Listener, const FGameplayTag& PhaseTag, EPhaseTagMatchType MatchType,
+		FGamePhaseTagDynamicDelegate WhenPhaseActive, const bool bListenOnce = true);
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, meta = (DisplayName = "When Phase Ends", AutoCreateRefTerm = "WhenPhaseEnd, PhaseTag", Categories = "GamePhase"))
-	void K2_WhenPhaseEnds(UObject* Listener, const FGameplayTag& PhaseTag, EPhaseTagMatchType MatchType, FGamePhaseTagDynamicDelegate WhenPhaseEnd);
+	void K2_WhenPhaseEnds(UObject* Listener, const FGameplayTag& PhaseTag, EPhaseTagMatchType MatchType,
+		FGamePhaseTagDynamicDelegate WhenPhaseEnd, const bool bListenOnce = true);
 	
 	UFUNCTION(BlueprintPure, BlueprintAuthorityOnly, meta = (AutoCreateRefTerm = "PhaseTag", Categories = "GamePhase"))
 	bool IsPhaseActive(const FGameplayTag& PhaseTag) const;
@@ -86,9 +90,10 @@ private:
 	{
 		bool IsMatch(const FGameplayTag& ComparePhaseTag) const;
 	
-		FGameplayTag PhaseTag;
+		FGameplayTag PhaseTag = FGameplayTag::EmptyTag;
 		EPhaseTagMatchType MatchType = EPhaseTagMatchType::ExactMatch;
 		FGamePhaseTagDelegate PhaseCallback;
+		bool bObserveOnce = true;
 	};
 
 	typedef TMap<TWeakObjectPtr<UObject>, FPhaseObserveInfo> FPhaseObserver;
