@@ -8,9 +8,13 @@ public class CustomGameplayLibrary : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "Niagara",
+			"Core", "CoreUObject", "Engine", "Niagara", 
 			"GameplayAbilities", "GameplayTags"
 		});
 		
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"Slate", "SlateCore",
+		});
 	}
 }

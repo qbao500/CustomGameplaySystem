@@ -47,8 +47,12 @@ public:
 	UFUNCTION(BlueprintPure)
 	float GetMaxDistance() const;
 	UFUNCTION(BlueprintPure)
+	float GetMaxFocusAngle() const;
+	UFUNCTION(BlueprintPure)
 	float GetLocationForwardOffset() const;
 
+	UFUNCTION(BlueprintCallable)
+	void SetMaxDistance(const float NewValue);
 	UFUNCTION(BlueprintCallable)
 	void SetMaxFocusAngle(const float NewValue);
 

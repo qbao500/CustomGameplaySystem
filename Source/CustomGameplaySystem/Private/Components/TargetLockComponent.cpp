@@ -70,9 +70,19 @@ float UTargetLockComponent::GetMaxDistance() const
 	return MaxDistance;
 }
 
+float UTargetLockComponent::GetMaxFocusAngle() const
+{
+	return MaxFocusAngle;
+}
+
 float UTargetLockComponent::GetLocationForwardOffset() const
 {
 	return LocationForwardOffset;
+}
+
+void UTargetLockComponent::SetMaxDistance(const float NewValue)
+{
+	MaxDistance = FMath::Max(1.0f, NewValue);
 }
 
 void UTargetLockComponent::SetMaxFocusAngle(const float NewValue)
