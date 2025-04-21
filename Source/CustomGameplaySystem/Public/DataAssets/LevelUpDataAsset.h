@@ -30,19 +30,12 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	int32 CalculateNewLevel(const int32 CurrentLevel, const float NewTotalXP) const;
+	
 	UFUNCTION(BlueprintPure)
 	float GetXPRequiredForLevel(int32 Level) const;
-
-	// For example, if current Level needs 200 XP and next Level  needs 300 XP, this function will return 100
+	
 	UFUNCTION(BlueprintPure)
-	int32 FindDeltaXPNeededForLevel(const int32 Level) const;
-
-	// For example, if Level 2 needs 200 XP, this function will return 200
-	UFUNCTION(BlueprintPure)
-	int32 FindTotalXPNeededForLevel(const int32 Level) const;
-
-	UFUNCTION(BlueprintPure)
-	float CalculatePercentageForXPBar(const int32 CurrentLevel, const int32 CurrentXP) const;
+	float CalculatePercentageForXPBar(const int32 CurrentLevel, const float CurrentXP) const;
 
 protected:
 
@@ -57,7 +50,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = "!bHasMaxLevelCap", TitleProperty = "From level {FromLevel} needs {DeltaRequiredXP} XP"))
 	TArray<FExtraLevelInfo> ExtraLevels;
-	int32 CalculateAmountOfLevelUpFromExtraLevels(const int32 CurrentLevel, const float CurrentXP) const;
 
 	FRealCurve* GetExperienceForLevelCurve() const;
 	float GetMaxLevelFromCurve() const;

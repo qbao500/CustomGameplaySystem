@@ -69,85 +69,17 @@ float ULevelUpDataAsset::GetXPRequiredForLevel(int32 Level) const
 	return MaxXPFromCurve + (FoundInfo.DeltaRequiredXP * Multiplier);
 }
 
-int32 ULevelUpDataAsset::FindDeltaXPNeededForLevel(const int32 Level) const
-{
-	if (Level <= 1) return 0;
-
-	const int32 MaxXP = FindTotalXPNeededForLevel(Level);
-	const int32 MinXP = FindTotalXPNeededForLevel(Level - 1);
-
-	return FMath::Abs(MaxXP - MinXP);
-}
-
-// TODO Not support for bHasMaxLevelCap = false yet
-int32 ULevelUpDataAsset::FindTotalXPNeededForLevel(const int32 Level) const
-{
-	if (Level <= 1) return 0;
-
-	const FRealCurve* Curve = GetExperienceForLevelCurve();
-	if (!Curve) return 0;
-
-	return Curve->Eval(Level);
-}
-
-// TODO Not support for bHasMaxLevelCap = false yet
-float ULevelUpDataAsset::CalculatePercentageForXPBar(const int32 CurrentLevel, const int32 CurrentXP) const
+float ULevelUpDataAsset::CalculatePercentageForXPBar(const int32 CurrentLevel, const float CurrentXP) const
 {
 	if (CurrentLevel <= 0 || CurrentXP <= 0) return 0.0f;
 
-	const FRealCurve* Curve = GetExperienceForLevelCurve();
-	if (!Curve) return 0.0f;
+	const int32 MaxLevelFromCurve = GetMaxLevelFromCurve();
+	if (CurrentLevel >= MaxLevelFromCurve && bHasMaxLevelCap) return 1.0f;
 
-	const int32 MaxLevel = Curve->GetNumKeys();
-	if (CurrentLevel >= MaxLevel) return 1.0f;
-
-	const int32 MaxXP = FindTotalXPNeededForLevel(CurrentLevel + 1);
-	const int32 MinXP = FindTotalXPNeededForLevel(CurrentLevel);
+	const int32 MaxXP = GetXPRequiredForLevel(CurrentLevel + 1);
+	const int32 MinXP = GetXPRequiredForLevel(CurrentLevel);
 
 	return FMath::GetMappedRangeValueClamped(FVector2D(MinXP, MaxXP), FVector2D(0.0f, 1.0f), CurrentXP);
-}
-
-int32 ULevelUpDataAsset::CalculateAmountOfLevelUpFromExtraLevels(const int32 CurrentLevel, const float CurrentXP) const
-{
-	// At this stage, we're sure that CurrentLevel is greater than MaxLevelFromCurve
-	const int32 MaxLevelFromCurve = GetMaxLevelFromCurve();
-	const float MaxXPFromCurve = ExperienceForLevel.GetValueAtLevel(MaxLevelFromCurve);
-	
-	float DeltaXP = CurrentXP - MaxXPFromCurve;
-	int32 NextLevel = CurrentLevel + 1;
-	int32 LevelGained = 0;
-	
-	for (int32 I = 0; I < ExtraLevels.Num(); ++I)
-	{
-		const FExtraLevelInfo& Info = ExtraLevels[I];
-		const bool bHasNextInfo = ExtraLevels.IsValidIndex(I + 1);
-		TOptional<FExtraLevelInfo> NextInfo;
-		if (bHasNextInfo)
-		{
-			// Check if the next level is in the next info
-			// If true, skip to the next one
-			NextInfo = ExtraLevels[I];
-			if (NextLevel >= NextInfo->FromLevel) continue;
-		}
-		else
-		{
-			NextInfo.Reset();
-		}
-
-		while (DeltaXP - Info.DeltaRequiredXP >= 0)
-		{
-			DeltaXP -= Info.DeltaRequiredXP;
-			LevelGained++;
-
-			if (bHasNextInfo && NextInfo.IsSet() && NextLevel >= NextInfo->FromLevel)
-			{
-				// If the next level is in the next info, break this "while" loop
-				break;
-			}
-		}
-	}
-
-	return LevelGained;
 }
 
 FRealCurve* ULevelUpDataAsset::GetExperienceForLevelCurve() const
