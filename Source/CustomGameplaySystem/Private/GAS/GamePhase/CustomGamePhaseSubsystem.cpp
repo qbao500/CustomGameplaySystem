@@ -10,15 +10,29 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CustomGamePhaseSubsystem)
 
+UCustomGamePhaseSubsystem* UCustomGamePhaseSubsystem::Get(const UObject* WorldContextObject)
+{
+	return WorldContextObject->GetWorld()->GetSubsystem<UCustomGamePhaseSubsystem>();
+}
+
 void UCustomGamePhaseSubsystem::StartPhase(const TSubclassOf<UCustomGamePhaseAbility>& PhaseAbility,
 	const FGamePhaseDelegate& PhaseEndedCallback)
 {
 	if (!PhaseAbility) return;
+
+	const UCustomGamePhaseAbility* PhaseCDO = PhaseAbility.GetDefaultObject();
+	if (!PhaseCDO) return;
+
+	// Don't start the phase if it is already active
+	if (IsPhaseActive(PhaseCDO->GetGamePhaseTag()))
+	{
+		return;
+	}
 	
 	UCustomAbilitySystemComponent* GameStateASC = GetGameStateASC();
 	if (ensure(GameStateASC))
 	{
-		const FGameplayAbilitySpec Spec = FGameplayAbilitySpec(PhaseAbility, 1, 0, this);
+		const FGameplayAbilitySpec Spec = FGameplayAbilitySpec(PhaseAbility, 1, INDEX_NONE, this);
 		const FGameplayAbilitySpecHandle SpecHandle = GameStateASC->GiveAbility(Spec);
 		const FGameplayAbilitySpec* FoundSpec = GameStateASC->FindAbilitySpecFromHandle(SpecHandle);
 

@@ -45,6 +45,8 @@ class CUSTOMGAMEPLAYSYSTEM_API UCustomGamePhaseSubsystem : public UWorldSubsyste
 
 public:
 
+	static UCustomGamePhaseSubsystem* Get(const UObject* WorldContextObject);
+
 	void StartPhase(const TSubclassOf<UCustomGamePhaseAbility>& PhaseAbility, const FGamePhaseDelegate& PhaseEndedCallback = FGamePhaseDelegate());
 	
 	void WhenPhaseStartsOrIsActive(UObject* Listener, const FGameplayTag& PhaseTag, EPhaseTagMatchType MatchType,
