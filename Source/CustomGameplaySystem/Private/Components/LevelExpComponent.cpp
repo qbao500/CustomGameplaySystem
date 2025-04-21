@@ -59,14 +59,14 @@ void ULevelExpComponent::AddLevel(const int32 Levels)
 	OnChangedLevel.Broadcast(OldLevel, CurrentLevel);
 }
 
-int32 ULevelExpComponent::GetExp() const
+float ULevelExpComponent::GetExp() const
 {
 	return CurrentExp;
 }
 
-void ULevelExpComponent::AddExp(const int32 Exp)
+void ULevelExpComponent::AddExp(const float Exp)
 {
-	const int32 OldExp = CurrentExp;
+	const float OldExp = CurrentExp;
 
 	CurrentExp += Exp;
 
@@ -92,18 +92,19 @@ void ULevelExpComponent::OnRep_Level(const int32 OldLevel)
 	OnChangedLevel.Broadcast(OldLevel, CurrentLevel);
 }
 
-void ULevelExpComponent::OnRep_Exp(const int32 OldExp)
+void ULevelExpComponent::OnRep_Exp(const float OldExp)
 {
 	OnChangedExp.Broadcast(OldExp, CurrentExp);
 }
 
 void ULevelExpComponent::CheckForLevelUp()
 {
-	const int32 PotentialNewLevel = LevelUpData->FindLevelForXP(CurrentExp);
-	const int32 PotentialDeltaLevel = PotentialNewLevel - CurrentLevel;
-	if (PotentialDeltaLevel > 0)
+	//const int32 PotentialDeltaLevel = LevelUpData->CalculateAmountOfLevelUp(CurrentLevel, CurrentExp);
+	const int32 NewLevel = LevelUpData->CalculateNewLevel(CurrentLevel, CurrentExp);
+	const int32 LevelGained = NewLevel - CurrentLevel;
+	if (LevelGained > 0)
 	{
-		for (int32 i = 0; i < PotentialDeltaLevel; ++i)
+		for (int32 I = 0; I < LevelGained; ++I)
 		{
 			AddLevel(1);
 		}
@@ -152,7 +153,7 @@ void ULevelExpComponent::SaveLevelExp()
 	}
 }
 
-void ULevelExpComponent::OnLevelChanged_Internal(const int OldValue, const int NewValue)
+void ULevelExpComponent::OnLevelChanged_Internal(const float OldValue, const float NewValue)
 {
 	if (bAutoSaveWhenLevelChanged)
 	{
@@ -160,7 +161,7 @@ void ULevelExpComponent::OnLevelChanged_Internal(const int OldValue, const int N
 	}
 }
 
-void ULevelExpComponent::OnExpChanged_Internal(const int OldValue, const int NewValue)
+void ULevelExpComponent::OnExpChanged_Internal(const float OldValue, const float NewValue)
 {
 	if (bAutoSaveWhenExpChanged)
 	{

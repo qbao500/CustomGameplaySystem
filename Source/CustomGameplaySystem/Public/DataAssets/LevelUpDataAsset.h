@@ -7,6 +7,17 @@
 #include "Engine/DataAsset.h"
 #include "LevelUpDataAsset.generated.h"
 
+USTRUCT(BlueprintType)
+struct FExtraLevelInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 FromLevel = 1;
+	UPROPERTY(EditDefaultsOnly)
+	float DeltaRequiredXP = 100.f;
+};
+
 /**
  * 
  */
@@ -18,9 +29,11 @@ class CUSTOMGAMEPLAYSYSTEM_API ULevelUpDataAsset : public UDataAsset
 public:
 
 	UFUNCTION(BlueprintPure)
-	int32 FindLevelForXP(const int32 XP) const;
+	int32 CalculateNewLevel(const int32 CurrentLevel, const float NewTotalXP) const;
+	UFUNCTION(BlueprintPure)
+	float GetXPRequiredForLevel(int32 Level) const;
 
-	// For example, if Level 2 needs 200 XP and Level 3 needs 300 XP, this function will return 100
+	// For example, if current Level needs 200 XP and next Level  needs 300 XP, this function will return 100
 	UFUNCTION(BlueprintPure)
 	int32 FindDeltaXPNeededForLevel(const int32 Level) const;
 
@@ -37,5 +50,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	FScalableFloat ExperienceForLevel;
 
+	// Max level is capped at the last key of the curve used by ExperienceForLevel
+	// If false, there is no max level cap. Then, define extra levels in ExtraLevels
+	UPROPERTY(EditDefaultsOnly)
+	bool bHasMaxLevelCap = true;
+
+	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = "!bHasMaxLevelCap", TitleProperty = "From level {FromLevel} needs {DeltaRequiredXP} XP"))
+	TArray<FExtraLevelInfo> ExtraLevels;
+	int32 CalculateAmountOfLevelUpFromExtraLevels(const int32 CurrentLevel, const float CurrentXP) const;
+
 	FRealCurve* GetExperienceForLevelCurve() const;
+	float GetMaxLevelFromCurve() const;
+
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 };

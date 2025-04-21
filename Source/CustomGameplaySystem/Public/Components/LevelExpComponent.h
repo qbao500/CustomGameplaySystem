@@ -11,7 +11,7 @@
 class UFeedbackEffectDataAsset;
 class ULevelUpDataAsset;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FStatChanged, const int32, OldValue, const int32, NewValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FStatChanged, const float, OldValue, const float, NewValue);
 
 UCLASS(ClassGroup = (Level), meta = (BlueprintSpawnableComponent))
 class CUSTOMGAMEPLAYSYSTEM_API ULevelExpComponent : public UActorComponent
@@ -30,9 +30,9 @@ public:
 	void AddLevel(const int32 Levels);
 	
 	UFUNCTION(BlueprintPure)
-	int32 GetExp() const;
+	float GetExp() const;
 	UFUNCTION(BlueprintCallable)
-	void AddExp(const int32 Exp);
+	void AddExp(const float Exp);
 	
 	UPROPERTY(BlueprintAssignable)
 	FStatChanged OnChangedLevel;
@@ -65,9 +65,9 @@ protected:
 	virtual void OnRep_Level(int32 OldLevel);
 
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Exp)
-	int32 CurrentExp = 0;
+	float CurrentExp = 0;
 	UFUNCTION()
-	virtual void OnRep_Exp(int32 OldExp);
+	virtual void OnRep_Exp(float OldExp);
 
 private:
 
@@ -80,9 +80,9 @@ private:
 	void SaveLevelExp();
 
 	UFUNCTION()
-	void OnLevelChanged_Internal(const int OldValue, const int NewValue);
+	void OnLevelChanged_Internal(const float OldValue, const float NewValue);
 	UFUNCTION()
-	void OnExpChanged_Internal(const int OldValue, const int NewValue);
+	void OnExpChanged_Internal(const float OldValue, const float NewValue);
 
 	AActor* GetAvatar() const;
 
