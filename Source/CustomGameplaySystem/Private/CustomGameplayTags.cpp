@@ -27,6 +27,7 @@ namespace CustomTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Type_Active, "Ability.Type.Active", "Active ability type, can be triggered by input");
 
 	// Input tags
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Ability, "Input.Ability", "Make child of this tag for input of an ability");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Move, "Input.Move", "Move input tag");
 
 	// Attribute tags
