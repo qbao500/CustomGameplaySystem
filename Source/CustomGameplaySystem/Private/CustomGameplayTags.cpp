@@ -64,6 +64,7 @@ namespace CustomTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Status_CC_Disarm, "Status.CC.Disarm", "Can move, but can't attack");
 
 	// Status Death tags
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Status_Death, "Status.Death", "Parent tag for death status");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Status_Death_Dying, "Status.Death.Dying", "Target has begun the death process.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Status_Death_Dead, "Status.Death.Dead", "Target has finished the death process.");
 

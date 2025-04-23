@@ -208,6 +208,11 @@ void UCustomCorePawnComponent::InitializeAbilitySystem(UCustomAbilitySystemCompo
 
 	AbilitySystemComponent = InASC;
 	AbilitySystemComponent->InitAbilityActorInfo(InOwnerActor, Pawn);
+
+	if (ensure(PawnData))
+	{
+		AbilitySystemComponent->SetTagRelationshipMapping(PawnData->TagRelationshipMapping);
+	}
 	
 	BroadcastAbilitySystemInitialized();
 

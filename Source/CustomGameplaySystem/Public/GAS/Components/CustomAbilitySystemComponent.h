@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "CustomAbilitySystemComponent.generated.h"
 
+class UCustomAbilityTagRelationship;
 class UCustomGameplayAbility;
 class UCustomAbilityInfoDataAsset;
 
@@ -44,12 +45,21 @@ public:
 	virtual void InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor) override;
 	virtual void OnGiveAbility(FGameplayAbilitySpec& AbilitySpec) override;
 	virtual void OnRemoveAbility(FGameplayAbilitySpec& AbilitySpec) override;
+	virtual void ApplyAbilityBlockAndCancelTags(const FGameplayTagContainer& AbilityTags, UGameplayAbility* RequestingAbility,
+		bool bEnableBlockTags, const FGameplayTagContainer& BlockTags, bool bExecuteCancelTags, const FGameplayTagContainer& CancelTags) override;
 	virtual void AbilitySpecInputPressed(FGameplayAbilitySpec& Spec) override;
 	virtual void AbilitySpecInputReleased(FGameplayAbilitySpec& Spec) override;
 	//~ End UAbilitySystemComponent interface
 	
 	UFUNCTION(BlueprintPure, Category = "Custom|AbilitySystem")
 	static UCustomAbilitySystemComponent* GetCustomAbilityComponent(const AActor* Actor);
+
+	/** Gets the ability target data associated with the given ability handle and activation info */
+	void GetAbilityTargetData(const FGameplayAbilitySpecHandle AbilityHandle, const FGameplayAbilityActivationInfo& ActivationInfo,
+		FGameplayAbilityTargetDataHandle& OutTargetDataHandle) const;
+
+	/** Looks at ability tags and gathers additional required and blocking tags */
+	void GetAdditionalActivationTagRequirements(const FGameplayTagContainer& AbilityTags, FGameplayTagContainer& OutActivationRequired, FGameplayTagContainer& OutActivationBlocked) const;
 
 	typedef TFunctionRef<bool(const UCustomGameplayAbility* CustomAbility, FGameplayAbilitySpecHandle Handle)> TShouldCancelAbilityFunc;
 	void CancelAbilitiesByFunc(TShouldCancelAbilityFunc ShouldCancelFunc, bool bReplicateCancelAbility);
@@ -99,7 +109,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Custom|AbilitySystem|Input")
 	FAbilityInputTagChanged OnAbilityInputTagChanged;
 
+	/** Sets the current tag relationship mapping, if null it will clear it out */
+	void SetTagRelationshipMapping(UCustomAbilityTagRelationship* NewMapping);
+
 protected:
+
+	// If set, this table is used to look up tag relationships for activate and cancel
+	UPROPERTY()
+	TObjectPtr<UCustomAbilityTagRelationship> TagRelationshipMapping;
 
 	virtual void TryActivateAbilitiesOnSpawn();
 

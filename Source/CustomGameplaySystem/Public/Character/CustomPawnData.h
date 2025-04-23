@@ -6,6 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "CustomPawnData.generated.h"
 
+class UCustomAbilityTagRelationship;
 class UCustomInputConfig;
 class UCustomAbilitySet;
 
@@ -24,6 +25,10 @@ public:
 	// Ability sets to grant to this pawn's ability system.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Abilities")
 	TArray<TObjectPtr<UCustomAbilitySet>> AbilitySets;
+	
+	// What mapping of ability tags to use for actions taking by this pawn
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Abilities")
+	TObjectPtr<UCustomAbilityTagRelationship> TagRelationshipMapping;
 
 	// Input configuration used by player controlled pawns to create input mappings and bind input actions.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Input")

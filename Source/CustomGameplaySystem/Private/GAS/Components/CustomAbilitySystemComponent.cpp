@@ -13,6 +13,7 @@
 #include "FunctionLibraries/CustomHelperFunctionLibrary.h"
 #include "FunctionLibraries/PrintLogFunctionLibrary.h"
 #include "GAS/CustomAbilitySystemGlobals.h"
+#include "GAS/CustomAbilityTagRelationship.h"
 #include "GAS/Abilities/CustomGameplayAbility.h"
 #include "GAS/CustomGlobalAbilitySubsystem.h"
 
@@ -98,6 +99,23 @@ void UCustomAbilitySystemComponent::OnRemoveAbility(FGameplayAbilitySpec& Abilit
 	OnAbilityRemoved.Broadcast(AbilitySpec);
 }
 
+void UCustomAbilitySystemComponent::ApplyAbilityBlockAndCancelTags(const FGameplayTagContainer& AbilityTags,
+	UGameplayAbility* RequestingAbility, bool bEnableBlockTags, const FGameplayTagContainer& BlockTags,
+	bool bExecuteCancelTags, const FGameplayTagContainer& CancelTags)
+{
+	FGameplayTagContainer ModifiedBlockTags = BlockTags;
+	FGameplayTagContainer ModifiedCancelTags = CancelTags;
+	
+	if (TagRelationshipMapping)
+	{
+		// Use the mapping to expand the ability tags into block and cancel tag
+		TagRelationshipMapping->GetAbilityTagsToBlockAndCancel(AbilityTags, &ModifiedBlockTags, &ModifiedCancelTags);
+	}
+	
+	Super::ApplyAbilityBlockAndCancelTags(AbilityTags, RequestingAbility,
+		bEnableBlockTags, ModifiedBlockTags, bExecuteCancelTags, ModifiedCancelTags);
+}
+
 void UCustomAbilitySystemComponent::AbilitySpecInputPressed(FGameplayAbilitySpec& Spec)
 {
 	Super::AbilitySpecInputPressed(Spec);
@@ -127,6 +145,26 @@ void UCustomAbilitySystemComponent::AbilitySpecInputReleased(FGameplayAbilitySpe
 UCustomAbilitySystemComponent* UCustomAbilitySystemComponent::GetCustomAbilityComponent(const AActor* Actor)
 {
 	return Cast<UCustomAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor));
+}
+
+void UCustomAbilitySystemComponent::GetAbilityTargetData(const FGameplayAbilitySpecHandle AbilityHandle,
+	const FGameplayAbilityActivationInfo& ActivationInfo, FGameplayAbilityTargetDataHandle& OutTargetDataHandle) const
+{
+	const TSharedPtr<FAbilityReplicatedDataCache> ReplicatedData =
+		AbilityTargetDataMap.Find(FGameplayAbilitySpecHandleAndPredictionKey(AbilityHandle, ActivationInfo.GetActivationPredictionKey()));
+	if (ReplicatedData.IsValid())
+	{
+		OutTargetDataHandle = ReplicatedData->TargetData;
+	}
+}
+
+void UCustomAbilitySystemComponent::GetAdditionalActivationTagRequirements(const FGameplayTagContainer& AbilityTags,
+	FGameplayTagContainer& OutActivationRequired, FGameplayTagContainer& OutActivationBlocked) const
+{
+	if (TagRelationshipMapping)
+	{
+		TagRelationshipMapping->GetRequiredAndBlockedActivationTags(AbilityTags, &OutActivationRequired, &OutActivationBlocked);
+	}
 }
 
 void UCustomAbilitySystemComponent::CancelAbilitiesByFunc(TShouldCancelAbilityFunc ShouldCancelFunc, bool bReplicateCancelAbility)
@@ -459,6 +497,11 @@ void UCustomAbilitySystemComponent::RemoveAbilitiesWithInputTag(const FGameplayT
 			ClearAbility(AbilitySpec.Handle);
 		}
 	}
+}
+
+void UCustomAbilitySystemComponent::SetTagRelationshipMapping(UCustomAbilityTagRelationship* NewMapping)
+{
+	TagRelationshipMapping = NewMapping;
 }
 
 void UCustomAbilitySystemComponent::TryActivateAbilitiesOnSpawn()
