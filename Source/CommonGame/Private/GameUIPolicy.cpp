@@ -11,12 +11,21 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameUIPolicy)
 
+UGameUIPolicy::UGameUIPolicy()
+{
+	// Set default LayoutClass to a pre-made asset. Please DO NOT change that asset name or move it.
+	// Hard-coded to reduce assigning Layout asset and GameUIManagerSubsystem config for GameUIPolicy.
+	// Developer still has the option to said things.
+	LayoutClass = TSoftClassPtr<UPrimaryGameLayout>(
+		FSoftObjectPath(TEXT("/CustomGameplaySystem/UI/WBP_PrimaryLayout.WBP_PrimaryLayout_C")));
+}
+
 // Static
 UGameUIPolicy* UGameUIPolicy::GetGameUIPolicy(const UObject* WorldContextObject)
 {
-	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	if (const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
 	{
-		if (UGameInstance* GameInstance = World->GetGameInstance())
+		if (const UGameInstance* GameInstance = World->GetGameInstance())
 		{
 			if (UGameUIManagerSubsystem* UIManager = UGameInstance::GetSubsystem<UGameUIManagerSubsystem>(GameInstance))
 			{
@@ -129,7 +138,7 @@ void UGameUIPolicy::AddLayoutToViewport(UCommonLocalPlayer* LocalPlayer, UPrimar
 
 void UGameUIPolicy::RemoveLayoutFromViewport(UCommonLocalPlayer* LocalPlayer, UPrimaryGameLayout* Layout)
 {
-	TWeakPtr<SWidget> LayoutSlateWidget = Layout->GetCachedWidget();
+	const TWeakPtr<SWidget> LayoutSlateWidget = Layout->GetCachedWidget();
 	if (LayoutSlateWidget.IsValid())
 	{
 		UE_LOG(LogCommonGame, Log, TEXT("[%s] is removing player [%s]'s root layout [%s] from the viewport"), *GetName(), *GetNameSafe(LocalPlayer), *GetNameSafe(Layout));
@@ -197,7 +206,8 @@ void UGameUIPolicy::CreateLayoutWidget(UCommonLocalPlayer* LocalPlayer)
 	}
 }
 
-TSubclassOf<UPrimaryGameLayout> UGameUIPolicy::GetLayoutWidgetClass(UCommonLocalPlayer* LocalPlayer)
+TSubclassOf<UPrimaryGameLayout> UGameUIPolicy::GetLayoutWidgetClass(UCommonLocalPlayer* LocalPlayer) const
 {
-	return LayoutClass.LoadSynchronous();
+	UClass* LoadedLayout = LayoutClass.LoadSynchronous();
+	return LoadedLayout;
 }

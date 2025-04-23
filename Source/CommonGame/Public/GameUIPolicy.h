@@ -51,12 +51,15 @@ public:
 	bool operator==(const ULocalPlayer* OtherLocalPlayer) const { return LocalPlayer == OtherLocalPlayer; }
 };
 
-UCLASS(Abstract, Blueprintable, Within = GameUIManagerSubsystem)
+UCLASS(Blueprintable, Within = GameUIManagerSubsystem)
 class COMMONGAME_API UGameUIPolicy : public UObject
 {
 	GENERATED_BODY()
 
 public:
+
+	UGameUIPolicy();
+	
 	template <typename GameUIPolicyClass = UGameUIPolicy>
 	static GameUIPolicyClass* GetGameUIPolicyAs(const UObject* WorldContextObject)
 	{
@@ -83,7 +86,7 @@ protected:
 	virtual void OnRootLayoutReleased(UCommonLocalPlayer* LocalPlayer, UPrimaryGameLayout* Layout);
 
 	void CreateLayoutWidget(UCommonLocalPlayer* LocalPlayer);
-	TSubclassOf<UPrimaryGameLayout> GetLayoutWidgetClass(UCommonLocalPlayer* LocalPlayer);
+	TSubclassOf<UPrimaryGameLayout> GetLayoutWidgetClass(UCommonLocalPlayer* LocalPlayer) const;
 
 private:
 	ELocalMultiplayerInteractionMode LocalMultiplayerInteractionMode = ELocalMultiplayerInteractionMode::PrimaryOnly;

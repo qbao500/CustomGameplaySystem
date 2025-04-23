@@ -14,10 +14,17 @@ void UGameUIManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	if (!CurrentPolicy && !DefaultUIPolicyClass.IsNull())
+	if (!CurrentPolicy)
 	{
-		TSubclassOf<UGameUIPolicy> PolicyClass = DefaultUIPolicyClass.LoadSynchronous();
-		SwitchToPolicy(NewObject<UGameUIPolicy>(this, PolicyClass));
+		if (!DefaultUIPolicyClass.IsNull())
+		{
+			SwitchToPolicy(NewObject<UGameUIPolicy>(this, DefaultUIPolicyClass.LoadSynchronous()));
+		}
+		else
+		{
+			// If no default policy is set, we can create a default one
+			SwitchToPolicy(NewObject<UGameUIPolicy>(this, UGameUIPolicy::StaticClass()));
+		}
 	}
 }
 
