@@ -5,7 +5,7 @@
 	"FriendlyName": "CustomGameplaySystem",
 	"Description": "",
 	"Category": "Other",
-	"CreatedBy": "Bao",
+	"CreatedBy": "Bao Nguyen",
 	"CreatedByURL": "https://qbao500.github.io/",
 	"DocsURL": "https://github.com/qbao500/CustomGameplaySystem",
 	"MarketplaceURL": "",
@@ -34,6 +34,11 @@
 			"Name": "CustomGameplaySystemEditor",
 			"Type": "Editor",
 			"LoadingPhase": "PostEngineInit"
+		},
+		{
+			"Name": "CommonUser",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
