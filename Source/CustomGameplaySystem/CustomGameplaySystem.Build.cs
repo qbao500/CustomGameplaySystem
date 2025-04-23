@@ -28,7 +28,7 @@ public class CustomGameplaySystem : ModuleRules
 				"Core", "CoreUObject", "Engine", "PhysicsCore", "EnhancedInput",
 				"GameplayTags", "GameplayAbilities", "GameplayTasks", "CommonUI",
 				"Niagara", "AIModule", "ModularGameplay",
-				"CustomGameplayLibrary", "ModularGameplayActors"
+				"CustomGameplayLibrary", "ModularGameplayActors", "CommonGame"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

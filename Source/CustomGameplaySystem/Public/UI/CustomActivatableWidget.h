@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "CommonActivatableWidget.h"
 #include "CustomActivatableWidget.generated.h"
 

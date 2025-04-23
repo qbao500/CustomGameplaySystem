@@ -2,9 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "CommonPlayerController.h"
 #include "GameplayTagContainer.h"
-#include "ModularPlayerController.h"
 #include "CustomPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -18,7 +17,7 @@ struct FInputActionValue;
  * Override InitializePlayerInputFromConfig to bind more input (InputConfig is from PawnData).
  */
 UCLASS()
-class CUSTOMGAMEPLAYSYSTEM_API ACustomPlayerController : public AModularPlayerController
+class CUSTOMGAMEPLAYSYSTEM_API ACustomPlayerController : public ACommonPlayerController
 {
 	GENERATED_BODY()
 

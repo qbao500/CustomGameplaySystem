@@ -6,6 +6,7 @@
 #include "CustomGameplayTags.h"
 #include "GameplayTagContainer.h"
 #include "Components/GameFrameworkComponentManager.h"
+#include "Input/CustomPlayerController.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CustomGameInstance)
 
@@ -17,9 +18,19 @@ void UCustomGameInstance::Init()
 	UGameFrameworkComponentManager* ComponentManager = GetSubsystem<UGameFrameworkComponentManager>(this);
 	if (ensure(ComponentManager))
 	{
-		ComponentManager->RegisterInitState(CustomTags::InitState_Spawned, false, FGameplayTag());
+		ComponentManager->RegisterInitState(CustomTags::InitState_Spawned, false, FGameplayTag::EmptyTag);
 		ComponentManager->RegisterInitState(CustomTags::InitState_DataAvailable, false, CustomTags::InitState_Spawned);
 		ComponentManager->RegisterInitState(CustomTags::InitState_DataInitialized, false, CustomTags::InitState_DataAvailable);
 		ComponentManager->RegisterInitState(CustomTags::InitState_GameplayReady, false, CustomTags::InitState_DataInitialized);
 	}
+}
+
+void UCustomGameInstance::Shutdown()
+{
+	Super::Shutdown();
+}
+
+ACustomPlayerController* UCustomGameInstance::GetPrimaryPlayerController() const
+{
+	return Cast<ACustomPlayerController>(Super::GetPrimaryPlayerController(false));
 }
