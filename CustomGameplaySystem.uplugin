@@ -6,8 +6,8 @@
 	"Description": "",
 	"Category": "Other",
 	"CreatedBy": "Bao",
-	"CreatedByURL": "",
-	"DocsURL": "",
+	"CreatedByURL": "https://qbao500.github.io/",
+	"DocsURL": "https://github.com/qbao500/CustomGameplaySystem",
 	"MarketplaceURL": "",
 	"SupportURL": "",
 	"CanContainContent": true,
@@ -55,6 +55,10 @@
 		},
 		{
 			"Name": "EnhancedInput",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
 			"Enabled": true
 		}
 	]

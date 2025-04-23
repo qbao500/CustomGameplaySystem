@@ -76,6 +76,14 @@ namespace CustomTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(SaveGame_LevelExp, "SaveGame.LevelExp", "Used in LevelExpComponent. Make children tags for different character that need to use this component.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(SaveGame_WorldState, "SaveGame.WorldState", "ID for saving world state. Used by SaveLoadSubsystem->SaveWorldState()");
 
+	// UI tags
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI, "UI", "Parent tag for UI related tags");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer, "UI.Layer", "Parent tag for UI layers");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Game, "UI.Layer.Game", "Used for HUD");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_GameMenu, "UI.Layer.GameMenu", "Used for Gameplay menu, like inventory, etc.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Menu, "UI.Layer.Menu", "Used for Escape menu and other menus, like settings, etc.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Modal, "UI.Layer.Modal", "Used for modal menus, like confirmation dialogs, etc.");
+
 	// Ability activation failed tags.
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_ActivateFail_IsDead, "Ability.ActivateFail.IsDead", "Ability failed to activate because its owner is dead.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_ActivateFail_Cooldown, "Ability.ActivateFail.Cooldown", "Ability failed to activate because it is on cool down.");

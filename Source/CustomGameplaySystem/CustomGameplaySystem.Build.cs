@@ -26,7 +26,7 @@ public class CustomGameplaySystem : ModuleRules
 			new string[]
 			{
 				"Core", "CoreUObject", "Engine", "PhysicsCore", "EnhancedInput",
-				"GameplayTags", "GameplayAbilities", "GameplayTasks",
+				"GameplayTags", "GameplayAbilities", "GameplayTasks", "CommonUI",
 				"Niagara", "AIModule", "ModularGameplay",
 				"CustomGameplayLibrary", "ModularGameplayActors"
 				// ... add other public dependencies that you statically link with here ...
