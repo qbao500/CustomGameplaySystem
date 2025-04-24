@@ -9,13 +9,14 @@ public class CustomGameplaySystemEditor : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "UnrealEd", "EngineSettings",
+			"CommonUI",
+			"CustomGameplaySystem", "CommonGame", 
 		});
 		
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"Slate", "SourceControl",
 			"GameplayAbilities",
-			"CustomGameplaySystem",
 		});
 		
 	}

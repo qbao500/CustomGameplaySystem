@@ -32,6 +32,13 @@ private:
 	void CheckInputComponent() const;
 	void SetInputComponent(UInputSettings* InputSettings) const;
 
+	void CheckGameViewport();
+	void SetGameViewport() const;
+
+	void CheckLocalPlayer();
+	void SetLocalPlayer() const;
+
 	// Helpers
+	bool CanWriteToFile(const FString& ConfigFile) const;
 	void NotifyUserSuccess(FNotificationInfo& Info) const;
 };

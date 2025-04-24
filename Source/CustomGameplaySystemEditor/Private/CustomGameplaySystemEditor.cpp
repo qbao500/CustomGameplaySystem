@@ -1,6 +1,7 @@
 #include "CustomGameplaySystemEditor.h"
 
-#include "AbilitySystemGlobals.h"
+#include "CommonGameViewportClient.h"
+#include "CommonLocalPlayer.h"
 #include "GameMapsSettings.h"
 #include "SourceControlHelpers.h"
 #include "CoreGame/CustomGameInstance.h"
@@ -22,6 +23,8 @@ void FCustomGameplaySystemEditor::StartupModule()
 	CheckAbilitySystemGlobalsClass();
 	CheckMaxRPC();
 	CheckInputComponent();
+	CheckGameViewport();
+	CheckLocalPlayer();
 }
 
 void FCustomGameplaySystemEditor::ShutdownModule()
@@ -35,6 +38,8 @@ void FCustomGameplaySystemEditor::CheckGameInstance()
 	if (!GameMapsSettings) return;
 
 	const UClass* GameInstanceClass = GameMapsSettings->GameInstanceClass.TryLoadClass<UGameInstance>();
+	if (!GameInstanceClass) return;
+	
 	if (GameInstanceClass->IsChildOf(UCustomGameInstance::StaticClass()))
 	{
 		// All good
@@ -60,14 +65,14 @@ void FCustomGameplaySystemEditor::CheckGameInstance()
 
 void FCustomGameplaySystemEditor::SetGameInstance(UGameMapsSettings* GameMapsSettings) const
 {
+	check(GameMapsSettings);
+	
 	// Set to new class
 	GameMapsSettings->GameInstanceClass = UCustomGameInstance::StaticClass();
 	
 	// We can write to the file if it is not read only. If it is read only, then we can write to it if we successfully check it out with source control
 	const FString DefaultConfigFile = GameMapsSettings->GetDefaultConfigFilename();
-	const bool bCanWriteToFile = !IFileManager::Get().IsReadOnly(*DefaultConfigFile) ||
-		(USourceControlHelpers::IsEnabled() && USourceControlHelpers::CheckOutFile(DefaultConfigFile));
-	if (bCanWriteToFile)
+	if (CanWriteToFile(DefaultConfigFile))
 	{
 		GameMapsSettings->TryUpdateDefaultConfigFile(DefaultConfigFile, /* bWarnIfFail */ false);
 	}
@@ -92,8 +97,6 @@ void FCustomGameplaySystemEditor::CheckAbilitySystemGlobalsClass() const
 		return;
 	}
 	
-	UE_LOG(LogCustomEditor, Error, TEXT("CustomGameplaySystemEditor module - REQUIRE CustomAbilitySystemGlobals (or subclass of it) to be AbilitySystemGlobals"));
-
 	// Check UAbilitySystemGlobals config
 	const FSoftClassPath AbilitySystemGlobalsClassName = GetDefault<UAbilitySystemGlobals>()->AbilitySystemGlobalsClassName;
 	UE_LOG(LogCustomEditor, Verbose, TEXT("FCustomGameplaySystemEditor - AbilitySystemGlobalsClassName: %s"), *AbilitySystemGlobalsClassName.ToString());
@@ -235,9 +238,7 @@ void FCustomGameplaySystemEditor::SetInputComponent(UInputSettings* InputSetting
 	
 	// We can write to the file if it is not read only. If it is read only, then we can write to it if we successfully check it out with source control
 	const FString DefaultConfigFile = InputSettings->GetDefaultConfigFilename();
-	const bool bCanWriteToFile = !IFileManager::Get().IsReadOnly(*DefaultConfigFile) ||
-		(USourceControlHelpers::IsEnabled() && USourceControlHelpers::CheckOutFile(DefaultConfigFile));
-	if (bCanWriteToFile)
+	if (CanWriteToFile(DefaultConfigFile))
 	{
 		InputSettings->TryUpdateDefaultConfigFile(DefaultConfigFile, /* bWarnIfFail */ false);
 	}
@@ -249,6 +250,119 @@ void FCustomGameplaySystemEditor::SetInputComponent(UInputSettings* InputSetting
 		"You may need to restart the editor for it to take effect."
 	));
 	NotifyUserSuccess(Info);
+}
+
+void FCustomGameplaySystemEditor::CheckGameViewport()
+{
+	if (!GEngine) return;
+
+	const UClass* ViewportClass = GEngine->GameViewportClientClassName.TryLoadClass<UGameViewportClient>();
+	if (!ViewportClass) return;
+	
+	if (ViewportClass->IsChildOf(UCommonGameViewportClient::StaticClass()))
+	{
+		// All good
+		return;
+	}
+
+	// Warn and add option for users to set it up to our custom subclass
+	const FText MessageEntry = LOCTEXT("WrongViewport",
+		"GameViewportClientClassName is not a class of type UCommonGameViewportClient, which is required by CommonGame module");
+	const FText TokenText = LOCTEXT("ActionSetViewport",
+		"Set GameViewportClientClassName to use UCommonGameViewportClient (REQUIRED)");
+
+	FMessageLog("LoadErrors").Error()->AddToken(FTextToken::Create(MessageEntry));
+
+	FMessageLog("LoadErrors").Error()
+		->AddToken(FTextToken::Create(LOCTEXT("LabelSetViewport", "Click the link to set it to UCommonGameViewportClient. ")))
+		->AddToken(FActionToken::Create(
+			TokenText,
+			FText(),
+			FOnActionTokenExecuted::CreateRaw(this, &FCustomGameplaySystemEditor::SetGameViewport), true
+		));
+}
+
+void FCustomGameplaySystemEditor::SetGameViewport() const
+{
+	check(GEngine);
+
+	GEngine->GameViewportClientClassName = UCommonGameViewportClient::StaticClass();
+
+	// We can write to the file if it is not read only. If it is read only, then we can write to it if we successfully check it out with source control
+	const FString DefaultConfigFile = GEngine->GetDefaultConfigFilename();
+	if (CanWriteToFile(DefaultConfigFile))
+	{
+		GEngine->TryUpdateDefaultConfigFile(DefaultConfigFile, /* bWarnIfFail */ false);
+	}
+
+	// Notify user
+	FNotificationInfo Info(LOCTEXT(
+		"DoneSetViewport",
+		"GameViewportClientClassName is now using UCommonGameViewportClient.\n\n"
+		"You may need to restart the editor for it to take effect."
+	));
+	NotifyUserSuccess(Info);
+}
+
+void FCustomGameplaySystemEditor::CheckLocalPlayer()
+{
+	if (!GEngine) return;
+
+	const UClass* LocalPlayerClass = GEngine->LocalPlayerClassName.TryLoadClass<ULocalPlayer>();
+	if (!LocalPlayerClass) return;
+	
+	if (LocalPlayerClass->IsChildOf(UCommonLocalPlayer::StaticClass()))
+	{
+		// All good
+		return;
+	}
+
+	// Warn and add option for users to set it up to our custom subclass
+	const FText MessageEntry = LOCTEXT("WrongLocal",
+		"LocalPlayerClassName is not a class of type UCommonLocalPlayer, which is required by CommonGame module");
+	const FText TokenText = LOCTEXT("ActionSetLocal",
+		"Set LocalPlayerClassName to use UCommonLocalPlayer (REQUIRED)");
+
+	FMessageLog("LoadErrors").Error()->AddToken(FTextToken::Create(MessageEntry));
+
+	FMessageLog("LoadErrors").Error()
+		->AddToken(FTextToken::Create(LOCTEXT("LabelSetLocal", "Click the link to set it to UCommonLocalPlayer. ")))
+		->AddToken(FActionToken::Create(
+			TokenText,
+			FText(),
+			FOnActionTokenExecuted::CreateRaw(this, &FCustomGameplaySystemEditor::SetLocalPlayer), true
+		));
+}
+
+void FCustomGameplaySystemEditor::SetLocalPlayer() const
+{
+	check(GEngine);
+
+	GEngine->LocalPlayerClassName = UCommonLocalPlayer::StaticClass();
+
+	// We can write to the file if it is not read only. If it is read only, then we can write to it if we successfully check it out with source control
+	const FString DefaultConfigFile = GEngine->GetDefaultConfigFilename();
+	if (CanWriteToFile(DefaultConfigFile))
+	{
+		GEngine->TryUpdateDefaultConfigFile(DefaultConfigFile, /* bWarnIfFail */ false);
+	}
+
+	// Notify user
+	FNotificationInfo Info(LOCTEXT(
+		"DoneSetLocal",
+		"LocalPlayerClassName is now using UCommonLocalPlayer.\n\n"
+		"You may need to restart the editor for it to take effect."
+	));
+	NotifyUserSuccess(Info);
+}
+
+bool FCustomGameplaySystemEditor::CanWriteToFile(const FString& ConfigFile) const
+{
+	if (ConfigFile.IsEmpty()) return false;
+	
+	const bool bCanWriteToFile = !IFileManager::Get().IsReadOnly(*ConfigFile) ||
+		(USourceControlHelpers::IsEnabled() && USourceControlHelpers::CheckOutFile(ConfigFile));
+	return bCanWriteToFile;
 }
 
 void FCustomGameplaySystemEditor::NotifyUserSuccess(FNotificationInfo& Info) const
