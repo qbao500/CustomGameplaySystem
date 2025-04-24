@@ -8,7 +8,7 @@ public class CustomGameplaySystemEditor : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "UnrealEd",
+			"Core", "CoreUObject", "Engine", "UnrealEd", "EngineSettings",
 		});
 		
 		PrivateDependencyModuleNames.AddRange(new string[]

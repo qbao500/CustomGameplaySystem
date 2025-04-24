@@ -1,7 +1,9 @@
 #include "CustomGameplaySystemEditor.h"
 
 #include "AbilitySystemGlobals.h"
+#include "GameMapsSettings.h"
 #include "SourceControlHelpers.h"
+#include "CoreGame/CustomGameInstance.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "GameFramework/InputSettings.h"
 #include "GAS/CustomAbilitySystemGlobals.h"
@@ -15,7 +17,8 @@ DEFINE_LOG_CATEGORY(LogCustomEditor);
 void FCustomGameplaySystemEditor::StartupModule()
 {
 	UE_LOG(LogCustomEditor, Warning, TEXT("CustomGameplaySystemEditor module has been loaded"));
-	
+
+	CheckGameInstance();
 	CheckAbilitySystemGlobalsClass();
 	CheckMaxRPC();
 	CheckInputComponent();
@@ -24,6 +27,58 @@ void FCustomGameplaySystemEditor::StartupModule()
 void FCustomGameplaySystemEditor::ShutdownModule()
 {
 	UE_LOG(LogCustomEditor, Warning, TEXT("CustomGameplaySystemEditor module has been unloaded"));
+}
+
+void FCustomGameplaySystemEditor::CheckGameInstance()
+{
+	UGameMapsSettings* GameMapsSettings = UGameMapsSettings::GetGameMapsSettings();
+	if (!GameMapsSettings) return;
+
+	const UClass* GameInstanceClass = GameMapsSettings->GameInstanceClass.TryLoadClass<UGameInstance>();
+	if (GameInstanceClass->IsChildOf(UCustomGameInstance::StaticClass()))
+	{
+		// All good
+		return;
+	}
+
+	// Warn and add option for users to set it up to our custom subclass
+	const FText MessageEntry = LOCTEXT("WrongGI",
+		"GameInstanceClass is not a class of type UCustomGameInstance, which is required by this plugin");
+	const FText TokenText = LOCTEXT("ActionSetGI",
+		"Set GameInstanceClass to use UCustomGameInstance (REQUIRED)");
+
+	FMessageLog("LoadErrors").Error()->AddToken(FTextToken::Create(MessageEntry));
+
+	FMessageLog("LoadErrors").Error()
+		->AddToken(FTextToken::Create(LOCTEXT("LabelSetGI", "Click the link to set it to UCustomGameInstance. ")))
+		->AddToken(FActionToken::Create(
+			TokenText,
+			FText(),
+			FOnActionTokenExecuted::CreateRaw(this, &FCustomGameplaySystemEditor::SetGameInstance, GameMapsSettings), true
+		));
+}
+
+void FCustomGameplaySystemEditor::SetGameInstance(UGameMapsSettings* GameMapsSettings) const
+{
+	// Set to new class
+	GameMapsSettings->GameInstanceClass = UCustomGameInstance::StaticClass();
+	
+	// We can write to the file if it is not read only. If it is read only, then we can write to it if we successfully check it out with source control
+	const FString DefaultConfigFile = GameMapsSettings->GetDefaultConfigFilename();
+	const bool bCanWriteToFile = !IFileManager::Get().IsReadOnly(*DefaultConfigFile) ||
+		(USourceControlHelpers::IsEnabled() && USourceControlHelpers::CheckOutFile(DefaultConfigFile));
+	if (bCanWriteToFile)
+	{
+		GameMapsSettings->TryUpdateDefaultConfigFile(DefaultConfigFile, /* bWarnIfFail */ false);
+	}
+
+	// Notify user
+	FNotificationInfo Info(LOCTEXT(
+		"DoneSetGI",
+		"GameInstanceClass is now using UCustomGameInstance.\n\n"
+		"You may need to restart the editor for it to take effect."
+	));
+	NotifyUserSuccess(Info);
 }
 
 void FCustomGameplaySystemEditor::CheckAbilitySystemGlobalsClass() const
@@ -59,11 +114,11 @@ void FCustomGameplaySystemEditor::CheckAbilitySystemGlobalsClass() const
 		->AddToken(FActionToken::Create(
 			TokenText,
 			FText(),
-			FOnActionTokenExecuted::CreateRaw(this, &FCustomGameplaySystemEditor::AddAbilitySystemGlobalsClassName), true
+			FOnActionTokenExecuted::CreateRaw(this, &FCustomGameplaySystemEditor::SetCustomAbilitySystemGlobalsClass), true
 		));
 }
 
-void FCustomGameplaySystemEditor::AddAbilitySystemGlobalsClassName() const
+void FCustomGameplaySystemEditor::SetCustomAbilitySystemGlobalsClass() const
 {
 	UAbilitySystemGlobals* AbilitySystemGlobals = GetMutableDefault<UAbilitySystemGlobals>();
 	if (!AbilitySystemGlobals)
@@ -84,18 +139,7 @@ void FCustomGameplaySystemEditor::AddAbilitySystemGlobalsClassName() const
 		"AbilitySystemGlobals Class Name has been updated to use CustomAbilitySystemGlobals.\n\n"
 		"You need to restart the editor for it to take effect."
 	));
-
-	Info.FadeInDuration = 0.2f;
-	Info.ExpireDuration = 5.0f;
-	Info.FadeOutDuration = 1.0f;
-	Info.bUseThrobber = false;
-	Info.bUseLargeFont = false;
-
-	const TSharedPtr<SNotificationItem> Notification = FSlateNotificationManager::Get().AddNotification(Info);
-	if (Notification.IsValid())
-	{
-		Notification->SetCompletionState(SNotificationItem::CS_Success);
-	}
+	NotifyUserSuccess(Info);
 }
 
 void FCustomGameplaySystemEditor::CheckMaxRPC() const
@@ -147,18 +191,7 @@ void FCustomGameplaySystemEditor::SetMaxRPC() const
 		"net.MaxRPCPerNetUpdate is set to 5 in DefaultEngine.ini file.\n\n"
 		"You need to restart the editor for it to take effect."
 	));
-
-	Info.FadeInDuration = 0.2f;
-	Info.ExpireDuration = 5.0f;
-	Info.FadeOutDuration = 1.0f;
-	Info.bUseThrobber = false;
-	Info.bUseLargeFont = false;
-
-	const TSharedPtr<SNotificationItem> Notification = FSlateNotificationManager::Get().AddNotification(Info);
-	if (Notification.IsValid())
-	{
-		Notification->SetCompletionState(SNotificationItem::CS_Success);
-	}
+	NotifyUserSuccess(Info);
 }
 
 void FCustomGameplaySystemEditor::CheckInputComponent() const
@@ -166,7 +199,7 @@ void FCustomGameplaySystemEditor::CheckInputComponent() const
 	UInputSettings* InputSettings = UInputSettings::GetInputSettings();
 	if (!InputSettings) return;
 
-	UClass* InputCompClass = InputSettings->GetDefaultInputComponentClass();
+	const UClass* InputCompClass = InputSettings->GetDefaultInputComponentClass();
 	if (InputCompClass->IsChildOf(UCustomInputComponent::StaticClass()))
 	{
 		// All good
@@ -215,7 +248,11 @@ void FCustomGameplaySystemEditor::SetInputComponent(UInputSettings* InputSetting
 		"DefaultInputComponentClass is now using CustomInputComponent.\n\n"
 		"You may need to restart the editor for it to take effect."
 	));
+	NotifyUserSuccess(Info);
+}
 
+void FCustomGameplaySystemEditor::NotifyUserSuccess(FNotificationInfo& Info) const
+{
 	Info.FadeInDuration = 0.2f;
 	Info.ExpireDuration = 5.0f;
 	Info.FadeOutDuration = 1.0f;
