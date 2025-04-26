@@ -2,11 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "AsyncTriggerGameplayAbility.generated.h"
 
+struct FGameplayTagContainer;
 class UGameplayAbility;
 class UAbilitySystemComponent;
 

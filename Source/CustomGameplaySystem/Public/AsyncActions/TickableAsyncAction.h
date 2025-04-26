@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Engine/CancellableAsyncAction.h"
 #include "TickableAsyncAction.generated.h"
 

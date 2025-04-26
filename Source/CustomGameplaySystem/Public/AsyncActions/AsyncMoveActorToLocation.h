@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "CustomStructs.h"
 #include "TickableAsyncAction.h"
 #include "AsyncMoveActorToLocation.generated.h"

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Components/ControllerComponent.h"
 #include "CustomNumberPopComponent_Base.generated.h"

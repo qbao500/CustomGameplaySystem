@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "AttributeSet.h"
 #include "GameplayEffectTypes.h"
 #include "CustomAttributeSet_Base.generated.h"

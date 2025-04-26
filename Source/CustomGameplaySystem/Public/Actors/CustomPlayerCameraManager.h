@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Camera/PlayerCameraManager.h"
 #include "CustomPlayerCameraManager.generated.h"
 

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GAS/Abilities/CustomGameplayAbility.h"
 #include "CustomGamePhaseAbility.generated.h"
 

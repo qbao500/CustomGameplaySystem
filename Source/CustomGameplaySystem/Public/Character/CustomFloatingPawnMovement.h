@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "CustomFloatingPawnMovement.generated.h"
 

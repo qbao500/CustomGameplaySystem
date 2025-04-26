@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Feedback/NumberPopUp/CustomNumberPopComponent_Base.h"
 #include "CustomNumberPopComponent_Niagara.generated.h"
 

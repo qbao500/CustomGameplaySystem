@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Abilities/GameplayAbilityTargetActor_GroundTrace.h"
 #include "AbilityTarget_GroundTrace_Cursor.generated.h"
 

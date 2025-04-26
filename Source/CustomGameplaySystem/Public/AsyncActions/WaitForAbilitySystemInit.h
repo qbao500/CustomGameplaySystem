@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Character/CustomCorePawnComponent.h"
 #include "Engine/CancellableAsyncAction.h"
 #include "WaitForAbilitySystemInit.generated.h"

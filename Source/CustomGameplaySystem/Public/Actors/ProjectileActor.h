@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameplayEffectTypes.h"
 #include "Components/CustomProjectileComponent.h"
 #include "GameFramework/Actor.h"
 #include "GAS/Abilities/DamageGameplayAbility.h"

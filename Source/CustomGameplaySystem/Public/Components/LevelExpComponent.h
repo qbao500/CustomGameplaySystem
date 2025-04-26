@@ -2,12 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
-#include "SaveLoadSystem/CustomSaveGame.h"
 #include "LevelExpComponent.generated.h"
 
+class UCustomSaveGame;
 class UFeedbackEffectDataAsset;
 class ULevelUpDataAsset;
 

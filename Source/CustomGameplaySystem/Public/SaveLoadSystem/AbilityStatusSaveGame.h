@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GAS/Components/AbilityStatusComponent.h"
 #include "SaveLoadSystem/CustomSaveGame.h"

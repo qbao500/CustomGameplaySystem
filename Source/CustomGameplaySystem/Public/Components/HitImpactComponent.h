@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "HitReactionComponent.h"
 #include "Components/ActorComponent.h"
 #include "HitImpactComponent.generated.h"

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameplayEffect.h"
 #include "BaseDamageGameplayEffect.generated.h"
 

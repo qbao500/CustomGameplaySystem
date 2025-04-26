@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Camera/CameraModifier.h"
 #include "CustomCameraModifier.generated.h"
 

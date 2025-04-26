@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "DamageGameplayAbility.h"
 #include "Actors/ProjectileActor.h"
 #include "ProjectileGameplayAbility.generated.h"

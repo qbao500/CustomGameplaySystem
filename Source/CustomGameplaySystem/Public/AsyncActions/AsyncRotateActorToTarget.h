@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "AsyncActions/TickableAsyncAction.h"
 #include "AsyncRotateActorToTarget.generated.h"
 

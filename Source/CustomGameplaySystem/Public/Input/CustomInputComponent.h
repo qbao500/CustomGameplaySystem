@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "EnhancedInputComponent.h"
 #include "CustomInputConfig.h"
 #include "CustomInputComponent.generated.h"

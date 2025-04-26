@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "CustomGameplayTags.h"
 #include "GAS/Abilities/CustomGameplayAbility.h"
 #include "GAS/Effects/BaseDamageGameplayEffect.h"

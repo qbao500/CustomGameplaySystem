@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "CustomGameplayTags.h"
 #include "GameplayTagContainer.h"
 #include "HitboxComponent.h"

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Engine/StreamableManager.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "CustomHelperFunctionLibrary.generated.h"

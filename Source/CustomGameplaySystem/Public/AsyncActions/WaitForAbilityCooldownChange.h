@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Engine/CancellableAsyncAction.h"
 #include "WaitForAbilityCooldownChange.generated.h"

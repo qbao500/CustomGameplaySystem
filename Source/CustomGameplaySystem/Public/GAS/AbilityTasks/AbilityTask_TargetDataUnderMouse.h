@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "AbilityTask_CreateTargetData.h"
 #include "AbilityTask_TargetDataUnderMouse.generated.h"
 

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GAS/Abilities/DamageGameplayAbility.h"
 #include "MeleeGameplayAbility.generated.h"
 

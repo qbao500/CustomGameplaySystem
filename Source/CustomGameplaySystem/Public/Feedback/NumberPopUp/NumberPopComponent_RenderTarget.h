@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Feedback/NumberPopUp/CustomNumberPopComponent_Base.h"
 #include "NumberPopComponent_RenderTarget.generated.h"
 

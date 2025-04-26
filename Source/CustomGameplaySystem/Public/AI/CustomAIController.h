@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "ModularAIController.h"
 #include "CustomAIController.generated.h"
 

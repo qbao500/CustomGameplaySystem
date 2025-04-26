@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "CustomPawnComponent_Base.h"
 #include "CustomCorePawnComponent.generated.h"
 

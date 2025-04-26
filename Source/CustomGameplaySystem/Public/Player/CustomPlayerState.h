@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "Interfaces/LevelExpInterface.h"
 #include "ModularPlayerState.h"

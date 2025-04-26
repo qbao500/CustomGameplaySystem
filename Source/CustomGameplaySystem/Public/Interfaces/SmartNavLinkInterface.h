@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Navigation/NavLinkProxy.h"
 #include "UObject/Interface.h"
 #include "SmartNavLinkInterface.generated.h"
+
+class ANavLinkProxy;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
