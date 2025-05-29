@@ -5,20 +5,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(TickableAsyncAction)
 
-void UTickableAsyncAction::Activate()
-{
-	Super::Activate();
-
-	bActionActive = true;
-}
-
-void UTickableAsyncAction::Cancel()
-{
-	Super::Cancel();
-
-	bActionActive = false;
-}
-
 TStatId UTickableAsyncAction::GetStatId() const
 {
 	return this->GetStatID();
@@ -26,5 +12,5 @@ TStatId UTickableAsyncAction::GetStatId() const
 
 bool UTickableAsyncAction::IsTickable() const
 {
-	return bActionActive;
+	return IsActive();
 }

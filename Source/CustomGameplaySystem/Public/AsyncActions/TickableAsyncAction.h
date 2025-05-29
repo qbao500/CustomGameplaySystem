@@ -16,19 +16,11 @@ class CUSTOMGAMEPLAYSYSTEM_API UTickableAsyncAction : public UCancellableAsyncAc
 	GENERATED_BODY()
 
 public:
-
-	virtual void Activate() override;
-	virtual void Cancel() override;
-
+	
 	//~ Begin FTickableGameObject interface
 	virtual TStatId GetStatId() const override;
 	virtual bool IsTickable() const override;
 	virtual void Tick(float DeltaTime) override {}
 	//~ End FTickableGameObject interface
-	
-private:
-
-	// Only tick when action is activated
-	bool bActionActive = false;
 	
 };
