@@ -27,7 +27,6 @@ public:
 	FMoveFinished OnMoveFinished;
 
 	virtual void Activate() override;
-	virtual void Cancel() override;
 
 	virtual void Tick(float DeltaTime) override;
 

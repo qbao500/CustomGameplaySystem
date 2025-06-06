@@ -32,6 +32,8 @@ UAsyncRotateActorToTarget* UAsyncRotateActorToTarget::AsyncRotateActorToActor(AA
 	// Calculate rotator
 	FRotator RotationToTarget = (TargetActor->GetActorLocation() - ActorToRotate->GetActorLocation()).GetSafeNormal().ToOrientationRotator();
 	Node->SetTargetQuat(RotationToTarget);
+
+	Node->RegisterWithGameInstance(ActorToRotate);
 	
 	return Node;
 }
@@ -46,6 +48,8 @@ UAsyncRotateActorToTarget* UAsyncRotateActorToTarget::AsyncRotateActorToLocation
 	FRotator RotationToTarget = (TargetLocation - ActorToRotate->GetActorLocation()).GetSafeNormal().ToOrientationRotator();
 	Node->SetTargetQuat(RotationToTarget);
 	
+	Node->RegisterWithGameInstance(ActorToRotate);
+	
 	return Node;
 }
 
@@ -58,6 +62,8 @@ UAsyncRotateActorToTarget* UAsyncRotateActorToTarget::AsyncRotateActorToDirectio
 	// Calculate rotator
 	FRotator RotationToTarget = TargetDirection.GetSafeNormal().ToOrientationRotator();
 	Node->SetTargetQuat(RotationToTarget);
+
+	Node->RegisterWithGameInstance(ActorToRotate);
 	
 	return Node;
 }
@@ -71,6 +77,8 @@ UAsyncRotateActorToTarget* UAsyncRotateActorToTarget::AsyncRotateActorToRotation
 	// Calculate rotator
 	FRotator RotationToTarget = TargetRotation;
 	Node->SetTargetQuat(RotationToTarget);
+
+	Node->RegisterWithGameInstance(ActorToRotate);
 	
 	return Node;
 }

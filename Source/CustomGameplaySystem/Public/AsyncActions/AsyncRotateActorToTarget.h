@@ -20,7 +20,7 @@ struct FRotateActorSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Duration = 0.25f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EAlphaBlendOption EasingFunc = EAlphaBlendOption::Linear;

@@ -39,7 +39,9 @@ UAsyncMoveActorToLocation* UAsyncMoveActorToLocation::AsyncMoveActorToLocation(c
 		FHitResult HitResult;
 		const FVector Start = MoveInfo.TargetLocation + FVector::UpVector * 50;
 		const FVector End = MoveInfo.TargetLocation + FVector::UpVector * -200;
-		if (MoveInfo.ActorToMove->GetWorld()->LineTraceSingleByObjectType(HitResult, Start, End, ECC_WorldStatic))
+		FCollisionQueryParams QueryParams = FCollisionQueryParams::DefaultQueryParam;
+		QueryParams.AddIgnoredActor(MoveInfo.ActorToMove.Get());
+		if (MoveInfo.ActorToMove->GetWorld()->LineTraceSingleByObjectType(HitResult, Start, End, ECC_WorldStatic, QueryParams))
 		{
 			FVector NewTarget = HitResult.ImpactPoint;
 			NewTarget.Z += Node->CharacterMoveComp->GetCharacterOwner()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
@@ -66,13 +68,6 @@ void UAsyncMoveActorToLocation::Activate()
 	Super::Activate();
 }
 
-void UAsyncMoveActorToLocation::Cancel()
-{
-	Super::Cancel();
-
-	OnMoveFinished.Broadcast(true);
-}
-
 void UAsyncMoveActorToLocation::Tick(float DeltaTime)
 {
 	AActor* ActorToMove = MoveInfo.ActorToMove.Get();
@@ -91,7 +86,7 @@ void UAsyncMoveActorToLocation::Tick(float DeltaTime)
 	// Calculate current progress and location
 	const float DeltaProgress = DeltaTime / MoveSettings.Duration / MoveInfo.ActorToMove->CustomTimeDilation;
 	ProgressAlpha = FMath::Clamp(ProgressAlpha + DeltaProgress, 0.0f, 1.0f);
-	const float MoveAlpha = FAlphaBlend::AlphaToBlendOption(ProgressAlpha, MoveSettings.EasingFunc, MoveSettings.EasingCurve);
+	const float MoveAlpha = FAlphaBlend::AlphaToBlendOption(ProgressAlpha, MoveSettings.EasingFunc, MoveSettings.CustomEasingCurve);
 
 	// Calculate the new location
 	FVector NewLocation = FMath::Lerp<FVector, float>(MoveInfo.FromLocation, MoveInfo.TargetLocation, MoveAlpha);
@@ -148,7 +143,11 @@ float UAsyncMoveActorToLocation::GetCurrentProgressAlpha() const
 
 void UAsyncMoveActorToLocation::EndMove(const bool bInterrupted)
 {
-	OnMoveFinished.Broadcast(bInterrupted);
+	if (ShouldBroadcastDelegates())
+	{
+		OnMoveFinished.Broadcast(bInterrupted);
+	}
+	
 	Cancel();
 }
 

@@ -16,11 +16,14 @@ class CUSTOMGAMEPLAYSYSTEM_API UTickableAsyncAction : public UCancellableAsyncAc
 	GENERATED_BODY()
 
 public:
+
+	virtual void SetReadyToDestroy() override;
 	
 	//~ Begin FTickableGameObject interface
 	virtual TStatId GetStatId() const override;
 	virtual bool IsTickable() const override;
 	virtual void Tick(float DeltaTime) override {}
+	virtual UWorld* GetTickableGameObjectWorld() const override;
 	//~ End FTickableGameObject interface
 	
 };

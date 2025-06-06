@@ -39,7 +39,7 @@ struct FMoveActorSettings
 	EAlphaBlendOption EasingFunc = EAlphaBlendOption::Linear;
 	// Use this curve if EasingFunc is Custom
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "EasingFunc == EAlphaBlendOption::Custom", EditConditionHides))
-	TObjectPtr<UCurveFloat> EasingCurve = nullptr;
+	TObjectPtr<UCurveFloat> CustomEasingCurve = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bSweepCollisionWhileMoving = true;
 	// If sweep collision, then fail and stop moving after a percentage of duration (0.2 means 20%)
